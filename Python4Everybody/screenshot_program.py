@@ -1,0 +1,1 @@
+print("Erhard's screenshot program")
