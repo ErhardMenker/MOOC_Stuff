@@ -1,6 +1,7 @@
 # Python4Everybody
 
 - The Python for Everybody Specialization is a Coursera spec offered by University of Michigan's Charles Severance
+- All information on this specialization can be found within: https://www.coursera.org/specializations/python
 - The specialization teaches students how to use Python 2 to write fundamental code, understand data structures, import & parse data from the web, and SQL storage
 
 - Files that start with "Chapter_" are notes formulated around the presentation of Dr. Chuck's Python for Informatics (https://open.umich.edu/find/open-educational-resources/information/python-informatics-exploring-information-open-textbook)
