@@ -1,0 +1,195 @@
+<center> <h2>Getting & Cleaning Data - Week 4</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 Editing Text Variables*
+
+**A. Text Operations**
+
+- Common operations to be done to edit text variables in R:
+    - Convert all text to upper or lower case (tolower() and toupper())
+    - Split a string based on a delimiter (convert a character into different words when symbol occurs) (strsplit())
+    - Remove text and replace with others (if just with an empty string) (gsub(), sub())
+    - Values can be found if they match a certain pattern (grep(), grepl())
+    - Find out how many characters are in a text (nchar())
+    - Subset out a substring from a starting point (substr())
+    - Concatenate multiple strings with an option delimiter (paste(), paste0())
+    - Eliminate leading and trailing white space (str_trim() from the stringr package)
+    
+- Methods to replace text: 
+    - sub(oldText, newText, characterVec) only replaces the first instance of oldText with newText.
+    - gsub(oldText, newText, characterVec) replaces every instance of oldText with newText.
+    
+- Methods to find certain patterns:
+    - grep(pattern, characterVec) returns indices where the pattern is found in the element of               characterVec.
+    - grepl(pattern, characterVec) returns a logical vector where the pattern is found in that element       of characterVec. Useful for subsetting and tabulation.
+
+```{r echo=TRUE, eval=TRUE}
+setwd("C:/Users/MENKEEX1/Desktop/Local_Projects/JHU/Getting_and_cleaning_data")
+#import parking data
+if(!file.exists("./data")){dir.create("./data")} 
+fileUrl <- "https://data.baltimorecity.gov/api/views/dz54-2aru/rows.csv?accessType=DOWNLOAD"
+download.file(fileUrl, destfile="./data/cameras.csv")
+cameraData <- read.csv("./data/cameras.csv")
+
+names(cameraData) # print out the column names of the data frame
+
+# change the case of every text
+tolower(names(cameraData)) # make all of the names of the data frame lower case (note does not mutate DF directly)
+toupper(names(cameraData)) # returns a character vector of all upper case column names of cameraData
+
+# split based on delimiters
+splitNames <- strsplit(names(cameraData), "\\.") # split every name when an actual period occurs ("\\" allows escape of regex meaning of ".")
+splitNames[5] # no alteration occurs because no period was in this text
+splitNames[6] # "Location.1" -> "Location" "1"
+sapply(splitNames, function(x) x[1]) # go into each element of splitNames and take only the first character, which means anything after the first period delimiter is dropped
+
+
+# prep the solution and reviews online data sets into a handler
+setwd("C:/Users/MENKEEX1/Desktop/Local_Projects/JHU/Getting_and_cleaning_data")
+if (!file.exists("./data")) {dir.create("./data")}
+fileUrl1 = "https://dl.dropboxusercontent.com/u/7710864/data/reviews-apr29.csv"
+fileUrl2 = "https://dl.dropboxusercontent.com/u/7710864/data/solutions-apr29.csv"
+download.file(fileUrl1, destfile="./data/reviews.csv")
+download.file(fileUrl2, destfile="./data/solutions.csv")
+reviews = read.csv("./data/reviews.csv"); solutions <- read.csv("./data/solutions.csv")
+head(reviews, 2); head(solutions, 2) # note that these data sets are the same except the final column
+
+names(reviews)
+
+sub("_", "", names(reviews),) # strike out any "_" in the column names of the reviews data frame
+
+# illustrating sub vs gsub
+testName <- "this_is_a_test"
+# sub replaces just the first instance of the old text
+sub("_", "", testName) # returns: "thisis_a_test"
+# gsub replaces all instances of the old text
+gsub("_", "", testName) # returns: "thisisatest"
+
+cameraData <- read.csv("./data/cameras.csv")
+
+# illustrating grep vs grepl
+# grep
+grep("Alameda", cameraData$intersection) # returns an integer vector where Alameda is in the intersection column
+grep("Alameda", cameraData$intersection, value=TRUE) # return the values instead of the indices where Alameda appears
+length(grep("JeffStreet", cameraData$intersection)) # how many times does JeffStreet appear in the intersection column?
+
+# grepl
+grepl("Alameda", cameraData$intersection) # returns a logical vector where Alameda is in intersection character vector
+table(grepl("Alameda", cameraData$intersection)) # tabulate where does (TRUE) and doesn't (FALSE) have Alameda 
+cameraData2 <- cameraData[!grepl("Alameda",cameraData$intersection), ] # return all instances where Alameda does NOT appear in the intersection characteristic
+
+# Misc useful string functions
+nchar("Erhard ") # returns 7 (the white space counts)
+substr("Erhard", 3, 7) # return "hard" (return the third through seventh character)
+paste("Erhard", "Menker") # return "Erhard Menker" (defaults to space delimiter)
+paste("Erhard", "Menker", sep=": ") # return "Erhard: Menker" (overwrites the default space delimiter)
+paste0("Erhard", "Menker") # return "ErhardMenker" (paste0 has no delimiter; cannot be conveyed in paste())
+
+require(stringr)
+stringr::str_trim(" Erhard  ") # returns "Erhard"
+```
+
+**B. Requirements for Text Data**
+
+- Names of variables should be:
+    - all lower case
+    - descriptive (avoid confusing abbreviations)
+    - not duplicated
+    - not have underscores/dots/white spaces
+- Variables with character values:
+    - should be made into factor variables
+    - should be descriptive (avoid using integer codes)
+    
+####*Video 1.2-1.3 Regular Expressions*
+
+**A. Regular Expressions Introduction**
+
+- Regular expressions are a combination of literals and metacharacters.
+    - literals are characters that refer explicitly to that character ("." literally means a period).
+    - metacharacters are characters that can represent a different array of characters ("." matches         zero or more characters).
+    - In regex statements, literals are placed in open brackets [] so they are known to not be              metacharacters.
+- The simplest form of regular expressions only matches literals. Regex becomes more useful when characters take on metacharacter meaning and can search many possibilities.
+- Regex is useful for functions that either find or substitute text in R (grepl, grep, sub, gsub).
+
+- Important metacharacters:
+    - ^<text> matches any line that STARTS with <text>
+    - <text>$ matches any line that ENDS with <text>
+    - [<chars1][chars2]... matches any line with any of the characters in char1, followed by char2,         and so on ([Bb][Uu][Ss][Hh] will match any capitalization of the word "bush").
+    - the regex: ^[Ii] am (this will match any line that starts with i or I and has a space followed        by am).
+    - ranges of characters can be searched with a -
+    - the regex: ^[0-9][a-zA-Z] (match anything that starts with a number and is followed by an upper       or lower case letter)
+    - Used at the beginning of a character class, the "^" indicates that something should not be            matched
+    - the regex: [^?.]$ (matches anything that does not have a question mark or period in it)
+    - The "." refers to match one and only one character.
+    - the regex: 9.11 [matches any line where there is a 9 and an 11 separated by only one arbitrary        character].
+    - The "<text1>|<text2>" indicates to match any line that has <text1> or <text2> (can be more than       just two pieces of text if all separated by "|").
+    - the regex: ^[Gg]ood|[Bb]ad (matches any line that starts with Good or good OR has Bad or bad          anywhere in the line).
+    - For the above example, wrapping the alternatives in parenthesis applied the ^ operator to every       option: ^([Gg]ood|[Bb]ad) (matches lines that start with Good, good, Bad, bad).
+    - The "?" indicates that the preceding expression is optional.
+    - the regex: [Gg]eorge( [Ww]\.)? [Bb]ush says that an upper or lower case W. is optional for match       (we needed the "\" to dictate that the following "." is a literal.
+    - The "*" and "+" indicates any text can exist in this place. They are the same except only * will       match zero characters while + needs at least one character there to find a match.
+    - the regex: [0-9]+ (.*)[0-9]+ (matches any line that has a number followed by any characters           followed by another number).
+    - {a, b} will match a pattern between a and b times (a and b are integers). 
+    - {m} means exactly m matches.
+    - {m,} means at least m matches.
+    - the regex: +([a-zA-Z]+) +\1 + (matches any word that is repeated at least once)
+    - the regex: [Bb]ush( +[^ ]+ +){1,5} debate (match anything where Bush or bush is followed by           debate, but with 1 through 5 words surrounded by white space in between).
+    - The "*" is greedy; it matches the longest possible string that satisfied the regex. It's              greediness can be turned off by immediately following it by: *?
+    
+####*Video 1.4 Working with Dates*
+
+- Dates are often presented in the character or date class.
+- Dates are stored as numbers behind the hood, meaning that arithmetic operations between them are      possible.
+- as.Date() can be used for coercing strings into dates, when possible.
+- The date() function returns a character vector storing the date at time of execution.
+- The Sys.Date() function returns the current date as a date class.
+- Date class objects can be formatted by specifying the order in which to show a date's attributes.
+    - %d (day as a number 0-31)
+    - %a (abbreviated weekday)
+    - %A (unabbreviated weekday)
+    - %m (month 00-12)
+    - %b (abbreviated month)
+    - %B (unabbreviated month)
+    - %y (2 digit year)
+    - %Y (4 digit year)
+- A date class's attributes can be extracted via different commands:
+    - weedays(<dateobj>) (what day of the week was this date?)
+    - months(<dateobj>) (which month was it?)
+    - julian(<dateobj>) (how many days since January 1st 1970?)
+- Lubridate is a package that makes working with dates easier. Assort "ymd" in any order and give it an input with those date attributes in their respective order and a date will be returned.
+
+```{r echo=TRUE, eval=TRUE}
+d1 <- date()
+d1
+class(d1) # character vector
+
+d2 <- Sys.Date()
+d2
+class(d2) # date class
+format(d2, "%a %b %d") # show the date to represent the weekday, month, and day (all abbreviated)
+
+x <- c("1jan1960", "2jan1960", "31mar1960", "30jul1960") # initialize a character vector of dates
+z <- as.Date(x, "%d%b%Y") # coerce each character element to a date with the long year and short day  and month
+z[1] - z[2] # reports the date difference between the two entries in a difftime class.
+as.numeric(z[1] - z[2]) # coerce the above difftime class to a numeric value.
+
+require(lubridate)
+lubridate::ymd("20150108") # returns a date with year 2015, month January, and day 08
+lubridate::mdy("08/04/2013") # returns a date with month August, day 04, and year 2013
+lubridate::dmy("03-04-2013") # returns a date with day 03, month April, and year 2013
+```
+
+####*Video 1.5 Free Data Resources*
+
+- Places that have free data:
+    - The United Nations
+    - OECD countries typically have a data website
+    - Gapminder (data about development and human health)
+    - Kaggle
+- APIs with R interfaces and their packages
+    - twitter & twitteR 
+    - figshare & rfigshare
+    - PLos & rplos
+    - rOpenSci
+    - Facebook & RFacebook
+    - Google maps & RGoogleMaps

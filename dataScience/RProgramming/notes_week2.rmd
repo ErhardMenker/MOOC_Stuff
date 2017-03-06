@@ -1,0 +1,389 @@
+<center> <h2>R Programming - Week 2</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 - 1.6 Control Structures*
+
+**A. If-Else**
+
+- If statements allow for conditional execution of code, optionally if statements can be       supplemented with else conditions.
+- R has the ability to add else if conditions, an arbitrarily large amount of these            statements may be executed.
+- If an else statement is added with no condition, then it will always be executed if the      execution did not occur based on the previous conditions.
+- indentation makes the code more readable.
+
+- Structure of if statement:
+    - if(condition1) {
+    -     (Do something)
+    - } else if(condition2) {
+    -     (Do something different)
+    - } else {    
+    -     (Do something different)
+    - }
+    
+- If statements can also be structured by assigning a variable to the conditional values at    the start of the statement.
+
+```{r echo=TRUE, eval=TRUE}
+## The following two executions are equivalent
+
+# Method 1
+x <- 4
+
+if(x > 3) {
+    y <- 10
+} else {
+    y <- 0
+}
+
+# Method 2
+# Assign y on the outside to either of these two values based on x
+y <- if(x > 3) { 
+    10
+} else {
+    0 
+}
+
+y # takes on a value of 10 because of x's assignment
+```
+  
+**B. For Loops**
+
+- For loops are definite loops that loop through each inputted element in order.
+- The variable being reassigned to each value in the loop is the iterator variable.
+- One line body executions can all be put on the same line (example below).
+
+- The structure of the for loop is:
+    - for(iteratorvar in set) {
+    -     (execute body)
+    - }
+
+```{r echo=TRUE, eval=TRUE}
+# Example 1: Loop through 1 to 10 and print out each number
+for(i in 1:10) {
+    print(i) # prints out each corresponding value of i based on the iteration
+}
+
+# Example 2: Loop through a character vector using different methods
+x <- c("a", "b", "c", "d") # initialize a character vector
+
+# create an integer vector with the index and index x in the body
+for(i in 1:4) {
+    print(x[i])
+}
+
+# same as above, but put it on one line because the body has just one line
+for(i in 1:4) print(x[i])
+
+# seq_along creates an integer index vector just like in above example
+for (i in seq_along(x)) {
+    print(x[i])
+}
+
+# loop through the characters and print them directly
+for (char in x){
+    print(char)
+}
+```
+
+- For loops can be nested. An outer loop iteration does not end until the inner loop goes      through each one of its iterations.
+
+```{r echo=TRUE, eval=TRUE}
+x <- matrix(1:6, 2, 3) # create a matrix x with 2 rows and 3 columns
+# loop along each index of the i rows of x
+print(x)
+for(i in seq_len(nrow(x))) {
+    # loop along each index of the j columns of x
+    for(j in seq_len(ncol(x))) {
+        # prints the first row entirely, followed by the second row (columnwise)
+        print(x[i, j])
+    }
+}
+```
+
+**C. While Loops**
+
+- While loops are indefinite loops that continue to execute until the control statement       evaluates to False.
+- If the control statement never evaluates to False, the loop written is infinite and the     program will never go past this control structure.
+- Loop logical tests can have multiple conditions that are dependent including the and/or    operators. 
+- Logical conditions always execute left to right.
+
+- The structure of the while loop is:
+    - while(logicaltest) {
+    -     # after body execution, test the logical condition gain    
+    -     execute body
+    - }
+    
+```{r echo=TRUE, eval=TRUE}
+# one condition while loop
+# initialize a count value
+count <- 0
+while(count <= 10) {
+    print(count)
+    # iterate the count value, will cause loop to stop executing once count exceeds 10
+    count <- count + 1
+}
+
+# multi-condition while loop
+z <- 5
+# z must be greater than or equal to 3 and less than or equal to 10 to re-execute the body
+while(z >= 3 & z <= 10) {
+    print(z)
+    # coin equals 1 with probability of 0.5
+    coin <- rbinom(1, 1, 0.5)
+    
+    # random walk:
+    # if this coin generation is a 1, add 1 to z
+    if(coin == 1) {
+        z <- z + 1
+    # otherwise, subtract one from z
+    } else {
+        z <- z - 1
+    }
+}
+```
+
+**D. Repeat, Next, Break**
+
+- repeat control structures are designed to be infinite loops, and therefore will continue   to execute the body until the word break is executed.
+
+- This is the repeat structure:
+    - repeat {
+    -   body (must include the word break here that will be executed for finite loop)
+    - }
+
+- In any loop structure, next indicates to immediately go to the next iteration of the loop.
+- In any loop structure, break indicates that a loop should be immediately exited.
+- In any loop structure, return yields a value and stops loop execution.
+
+```{r echo=TRUE, eval=TRUE}
+# break example
+for (i in 1:100) {
+    print(i)
+    # if i exceeds 10, stop execution by break
+    if(i > 10) {
+        break
+    }
+}
+
+# next example
+for (i in 1:30) {
+    # if i is less than 20, go onto the next iteration
+    if(i < 20) {
+        next
+    }
+    print(i)
+}
+```
+
+####*Video 1.7 - 1.9 Functions*
+
+**A. First R Functions**
+
+```{r echo=TRUE, eval=TRUE}
+# function add2 that adds 2 numbers
+add2 <- function(x, y) {
+    x + y
+}
+
+add2(3, 5)
+
+# function above10 that returns all elements greater than 1 in the input vector
+above10 <- function(x) {
+    # create vector of logicals saying if respective entry in x is greater than 10
+    logical <- x > 10
+    # subset x with this logical vector
+    x[logical]
+}
+
+above10(1:20)
+
+# write the same function as above, except replace 10 with an input variable that can be     any real number
+above_n <- function(x, n) {
+    logical <- x > n
+    x[logical]
+}
+
+above_n(1:10, 5) # returns a vector of all elements in 1:10 that exceed 5
+above_n(1:10, 7) # same as above, except 7
+
+# What if 10 is a common number? We can assign the function a default for n in definition.
+above <- function(x, n = 10) {
+    logical <- x > n
+    x[logical]
+}
+
+# because not specified otherwise, n is set to the default of 10
+above(1:15)
+# we have overwritten the default of n = 10 by saying n = 12
+above(1:15, 12)
+
+# create a function that calculates the column means of arbitrary data frames
+columnmean <- function(y, removeNA = TRUE) {
+    # find out how many columns there are to loop through each one
+    nc <- ncol(y)
+    # initialize the means output vector to a numeric vector of zeros
+    means <- numeric(nc)
+    # for every column in the data frame...
+    for(i in 1:nc) {
+        # ...calculate the mean of all entries in that column and append it to means, na.rm           evaluation depends on if default is overwritten
+        means[i] <- means(y[, i], na.rm = removeNA)
+    }
+    # repeat this statement at the end so columnmean call returns it
+    means
+}
+```
+
+**B. R Function Structure Overview**
+
+- Functions should be written in a text file, not the command line.
+- R function names are assigned to function(arglist) and surrounded by {}, with the body in   between.
+- R functions do not need to include a return statement; the statement that is returned is   the last line of the function.
+- In RStudio, functions are listed in the Functions section of the environment.
+- Functions are first class objects that are stored in memory. This means functions can be   passed as arguments to other functions and functions can be defined in one another         (nested).
+
+**C. Function Arguments**
+
+- Formal arguments are the arguments included in the function definition.
+- The formals() function returns a list of all formal function arguments.
+- args() lists all of the arguments and ordering of a function.
+- Not every function call in R makes use of all formal arguments.
+- Function arguments often times can either be missing or have default values.
+- R function arguments can be matched positionally or by calling out the name.
+- Relying on ordering and changing the order for no reason can be confusing in many cases,   so it best to state the argument's name and set it equal to the desired value and to not   switch up order meaninglessly.
+- Positional matching can be combined with matching by name...when this is done, R looks to   see which variables have been overtly matched, and then it goes through the remaining      arguments and maps them in order to the unnamed arguments in the function.
+- Named arguments are useful when there are many default arguments in the function, so you   want to be very specific about which variables are being stated in the function. 
+- Named arguments can be useful when you don't want to rely on the ordering which is needed   for positional arguments.
+- Convention often calls for setting named arguments equal to NULL in a function's           definition, to show that it must be set equal to something but has no reasonable default.   Syntactically, this is equivalent to setting no default for functional execution.
+
+```{r echo=TRUE, eval=TRUE}
+# The following calls to the sd function are all equivalent, just varying on how they        depend on ordering and default declaration:
+mydata <- rnorm(100) # creation of random normal vector to be used as sd argument
+sd(mydata)
+sd(x = mydata)
+sd(x = mydata, na.rm = FALSE)
+sd(na.rm = FALSE, x = mydata)
+sd(na.rm = FALSE, mydata)
+# Some of these calls take advantage of the fact that na.rm defaults to FALSE, and that x    is the first argument in the function definition.
+```
+
+**D. Lazy Evaluation**
+
+- Arguments to functions are evaluated lazily, or only as they are needed.
+- Lazy evaluation means that if arguments are not given to a function but the function does   not need that argument in the execution, no error is produced.
+
+```{r echo=TRUE, eval=TRUE}
+myfunc <- function(a, b) {
+    a ^ 2
+}
+myfunc(2) # this evaluates to 4, the fact that b has not been defined does not matter                  because this function call of myfunc(a=2) does not require b
+
+printfunc <- function(a, b=NULL) {
+    print(a)
+    print(b)
+}
+printfunc(2) # this function assigns a to 2 and prints it in the first call, and then                     errors out afterwards because b has not been assigned
+```
+
+**E. The "..." Argument**
+
+- The ... argument is used when extra arguments can be passed to a function which are not    directly used in that function, but can be used if that function calls another function.
+- The ... argument is also useful when the number of arguments is not known in advance.
+
+```{r echo=TRUE, eval=TRUE}
+args(paste) # this function starts with a ... , because you are able to concatenate an                   arbitrarily large amount of character vectors that cannot be known in                      advance. The sep and collapse named arguments come immediately after.
+```
+
+- Any arguments that come after the "..." must be named explicitly and cannot be partially   matches, since R cannot differentiate positional/partially matched arguments from further   "..." arguments.
+
+####*Video 1.10 - 1.12 Scoping Rules*
+
+**A. Scoping Introduction**
+
+- How does R know which values to assign to which symbol? 
+- Example: if I create a meaningless function called "lm" and then I print out lm, how does   it know if it should print out the just created function "lm" or the "lm" from the stats   package? 
+- R composes a search list showing in which order to search for objects, this can be         accessed using the search() function.
+- R will typically search the global environment of user created variables first, and then   search the different packages, and then lastly the stats package until the object is       found.
+- R always searches the global environment/workspace first and the base package last.
+- The order of the packages searched matter, because the search stops when the object is     found.
+- R has separate namespaces for functions and objects outside of the workspace, so it is     possible for there to be an object and function both with the same name.
+
+**B. Lexical Scoping**
+
+- The scoping rules determine how a value is associated with a free variable in a function.
+- R uses lexical/static scoping, the most common alternative to this is dynamic scoping.
+- Lexical scoping in R means that free variables (variable not explicitly defined in a       function, or non-formal) are searched for in the environment in which the function was     defined.
+- An environment is a collection of symbol-value pairs (variable assignments).
+- Every environment has a parent environment, and some parent enviornments have multiple     children environments.
+- The only environment without a parent is the empty environment.
+- Lexical scoping first searches the environment for free variables where the function was   called. If it is not found there, the search continues through all of the parent           environments until it reaches the workspace/global environment. If it is not found there,   it searches through all of the packages of the search list and errors out if not found in   any of those. This means the base package is the last area searched for variable values.
+- Lexical scoping simplifies statistical calculations.
+- Lexical scoping rules allows for functions to be defined in functions, because arguments   for the inner functions are searched in the outer function that calls it.
+- When a function is both created and called in the global environment, this gives the       appearance of dynamic scoping even though it is still lexical.
+
+```{r echo=TRUE, eval=TRUE}
+# Lexical vs Dynamic Scoping Example:
+y <- 10
+
+f <- function(x) {
+y <- 2
+y ^ 2 + g(2)
+}
+
+g <- function(x) {
+x * y
+}
+
+# In lexical scoping, f(3) sets y equal to 10 in g's execution because it searches for the   free variable y value at the same level where f was defined.
+# In dynamic scoping, f(3) sets y equal to two in g's execution because it searches at the   same level where f was called.
+```
+
+- Consequence of lexical scoping:
+    - All objects must be stored in memory.
+    - All functions must carry a pointer to their defining environment.
+    
+####*Video 1.13 Coding Standards in R*
+
+- Always use a text editor/file like RMD instead of the command line.
+- Indent your code by at least 4 spaces.
+- Limit width of code to about 80 columns so code doesn't go off the screen.
+- Limit functions to one basic activity for modularity and to make debugging easier.
+
+####*Video 1.14 Dates and Times in R*
+
+- Dates are represented by the date class.
+- Times are represented by the POSIXct or POSIXlt class.
+- Dates are stored internally as the number of days since January 1st, 1970.
+- Times are stored internally as the number of seconds since January 1st, 1970.
+- Dates are represented by coercing a proper character string using as.Date()
+
+```{r echo=TRUE, eval=TRUE}
+x <- as.Date("1969-01-01")
+x # shows date representation
+unclass(x) # shows integer representation, negative because this is before 1970
+```
+
+- Times are stored in the POSIXct or POSIXlt class.
+    - POSIXct is a very large integer internal in R, useful for data frame time storage.
+    - POSIXlt is a list that contains information like the day of the week, month, etc.
+    - POSIXct cannot be subsetted, it must be converted to POSIXlt for the list view.
+- Many generic functions work on dates and times.
+    - weekdays() gives the day of the week.
+    - months() gives the month's name.
+    - quarters() gives the quarter's number (Q1).
+    
+```{r echo=TRUE, eval=TRUE}
+x <- Sys.time() # give the exact time as of execution
+x
+p <- as.POSIXlt(x) # convert x to a POSIXlt standard
+p
+names(unclass(p))
+p$min # subset the min element of this list
+l <- as.POSIXct(x) # convert x to a POSIXct standard
+l
+unclass(l) # very large integer
+```
+
+- strptime() is useful if times are written in a different format than can be used in        as.Date(0), check ?strptime for more details.
+- Dates can be added and subtracted, as well as compared to one another using > == < and     other logicals.
+- Plots know that properly formatted dates are dates, and will format graphs accordingly.
+
+
+    

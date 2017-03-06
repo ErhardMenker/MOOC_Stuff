@@ -1,0 +1,118 @@
+Regression Models - Week 2
+============================================
+
+####*Videos 2.1-2.3 Statistical Linear Regression Models*
+
+**A. Introduction to Statistical Linear Regression**
+
+- Given least squares as an estimation tool, how can statistical inference occur?
+- Consider a single variable regression with a y-intercept and a slope term:
+    - The expected value of Y for a given value of X is the y-intercept plus the value of X multiplied by the slope term
+    - The error term at each value of X(i) is assumed to be Gaussian IID with mean 0 and variance sigma^2
+    - The variance of the Y term conditioned on X is sigma^2
+
+**B. Coefficient Interpretation**
+
+- The y-intercept of a regression is the value of the dependent variable when x is equal to zero (note that this is often a non-sensical x-value)
+- The slope on a coefficient is the expected change of the outcome variable caused by a one unit change of the predictor variable
+- Scaling an independent variable by a number divides the coefficient of that a variable by the same number
+- De-meaning/centering an independent variable changes the y-intercept (equals the mean of that y-intercept) but does not impact the slope
+- In R, using the predict() function with an equation predicts what the value of the dependent variable will be at the inputted levels of the independent variable. If newdata is left blank, then predicted values (yhats) will be given for each x in the original data frame from which the equation was fit
+
+```{r}
+### regression example using the diamond data set from UsingR
+require(UsingR); data(diamond)
+
+## exploratory analysis
+require(ggplot2)
+g <- ggplot(diamond, aes(x=carat, y=price))
+g <- g + xlab("Mass (carats)")
+g <- g + ylab("Price (SIN $")
+# accentuate the data points as blue with a black background
+g <- g + geom_point(size=6, color="black", alpha=0.2)
+g <- g + geom_point(size=5, color="blue", alpha=0.2)
+# fit a least squares regression line through the data
+g <- g + geom_smooth(method="lm", color="black")
+g
+
+## fit linear models
+# use least squares to estimate price as a function of carat
+fit <- lm(price ~ carat, data=diamond)
+# present the slopes and y-intercept
+coef(fit) # we expect an extra carat to raise price by $3721
+# more in detail with summary() (shows regression statistics)
+summary(fit)
+carat_obs <- c(0.83, 0.6, 0.73)# for the following carat sizes, what are the expected diamond prices?
+predict(fit, newdata=data.frame(carat=carat_obs)) # set the indep variable equal to the observations, and this will result in the expected price for the respectiv diamonds
+
+# use least squares the same, but center the carat about zero
+fit2 <- lm(price ~ I(carat - mean(carat)), data=diamond)
+fit2 # the slope is the same as in "fit", but we see that the mean price of a diamond is 500 SGD
+
+# use least squares the same, but express the units as one-tenth of a caret
+fit3 <- lm(price ~ I(10 * carat), data=diamond)
+fit3 # the slope is one-tenth as large as in "fit"
+```
+
+####*Video 2.4-2.6 Residuals*
+
+**A. Introduction**
+
+- The variation of predicted values around the fitted regression line is the residual variation
+- A residual for a predicted value of y for a given x is the actual value of y minus the predicted value of y
+- Residuals have some important characteristics
+    - The expected value of residuals is zero
+    - Residuals are useful for investigating poor model fit
+    - Positive residuals are overforecasts; negative residuals are underforecasts
+    
+```{r}
+### regression example using the diamond data set from UsingR
+require(UsingR); data(diamond)
+# fit a simple regression
+fit <- lm(price ~ carat, data=diamond)
+resid(fit) # for each (index) value of carat, what is the residual of the prediction of price?
+sum(resid(fit)) # should be zero
+```
+
+**B. Residual Variation**
+
+- The standard error of the regression is the square root of the sum of the squared residuals divided by n minus 2
+
+```{r}
+### regression example using the diamond data set from UsingR
+require(UsingR); data(diamond)
+# fit a simple regression
+fit <- lm(price ~ carat, data=diamond)
+
+# calculate the standard error from first principles
+sqrt(sum(resid(fit)^2) / (length(diamond$price) - 2))
+# calculate the standard error built-in
+summary(fit)$sigma
+```
+
+- Variability of a series being regressed on can be partitioned into different parts
+    - The total variability is the variability of the y variable about a horizontal line (inherent; independent of a regression)
+    - The regression variability is the variability captured by the fitted regression
+    - The portion of the total variability not explained by the regression variability is the residual variability
+- Explaining how well a model fits the data can be done via R squared
+    - R squared is the percentage of the total variability that is explained by the linear relationship of the predictor
+    - R squared is bounded between 0 and 1
+    - For univariate regression, R squared is the square of the sample correlation
+    - Deleting observations can often inflate R squared
+    - Adding terms to a regression model always has a non-decreasing impact on R squared
+    
+```{r}
+# Anscombe's example shows that different x and y data sets with very different relationships can have equivalent R squared and slope/y-intercept
+data(anscombe)
+example(anscombe)
+```
+
+####*Video 2.7-2.9 Inference in Regression*
+
+- Because of the assumption that residuals are IID normally distributed with mean zero and variance sigma^2, statistical inference can be executed on them using the t-distribution 
+- All else the same, a more spread out group of predictor variables decreases regression variance (for compact points, the regression line can easily change slopes and bend around)
+- A confidence interval can be calculated for a slope/intercept estimate by adding and subtracting the appropriate t-distribution quantile (with n - 2 degrees of freedom) multiplied by the standard error of the coefficient
+- Regression predictions are parsimonious and interpretable
+- Predicting a regression's point estimate is just a point of scaling the x-value by the slope and adding the y-intercept, but uncertainty should be incorporated using volatility estimates via prediction intervals
+    - Prediction intervals are wider than confidence intervals because confidence intervals about a regression line have a bandwidth converging to zero asymptotically as there becomes more and more confidence about where the line should be centered. However, this does not go away with prediction intervals because there is an inherent variable distribution of the underlying data for random variables that will exist regardless of fit
+    - Prediction/confidence intervals are narrower around the means of x-bar and y-bar because there is less certainty for the distribution of values that are extreme and rarely noticed

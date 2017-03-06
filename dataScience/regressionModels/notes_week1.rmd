@@ -1,0 +1,186 @@
+Regression Models - Week 1
+=======================================================
+
+####*Video 1.1-1.4 Introduction to Regression and Least Squares*
+
+**A. Introduction to Regression**
+
+- Regression was invented by Francis Galton both in name and concept (also discovered correlation)
+- Galton's motivating example was to predict children's height from the height of their parents. What relevant questions can be created around this inference?
+    - Try to find a parsimonious (easily described) mean relationship between parents' & children's height
+    - Find the variation in children's height not caused by their parents' height (residual variation)
+    - Quantify what impact genotype information beyond parental height explains child height
+    - To figure out how/whether assumptions are needed to generalize findings beyond data in question
+    - Why children of tall parents tend to be tall, but not as tall as parents (regression to the mean)?
+
+**B. Introduction to Basic Least Squares**
+
+- Francis Galton answered his question in 1885 to see how parents' height impacts the height of children
+- Notes about the experiment/data:
+    - Parent distribution is all heterosexual couples
+    - Correction for gender differences in mean heights by multiplying female heights by 1.08
+    - Overplotting is an issue from discretization
+    
+```{r}
+# import the galton data
+require(UsingR); data(galton)
+# reshape the galton data (every row has a child or parent categorical identifier with height next to it)
+require(reshape); long <- melt(galton)
+
+# plot a histogram of the long data set based on the "value" variable (height)
+g <- ggplot(long, aes(x=value, fill=variable))
+# set the bin width and the color
+g <- g + geom_histogram(color="black", binwidth=1)
+# break this down into 2 histograms by the "variable" (parent & child height in different histograms)
+g <- g + facet_grid(.~variable)
+g
+```
+
+- How could one describe the "middle" of children's heights?
+- Let Y(i) be the height of childe i for each of the 928 i (Y as this will be predicted from parents' heights), then the "middle" is the value of mu that minimizes the sum of the square of the differences of each Y(i) and mu
+- The value of mu that minimizes this squared difference is actually the mean of all Ys (y-bar) & is the physical center of mass of the histogram
+
+```{r}
+# import the galton data
+require(UsingR); data(galton)
+# reshape the galton data (every row has a child or parent categorical identifier with height next to it)
+require(reshape); long <- melt(galton)
+
+# write a function that creates a graph that slider can be used on and calculate mean of the sum of squared errors for a given mu
+require(manipulate)
+myHist <- function(mu) {
+    mse <- mean((galton$child - mu) ^ 2)
+    g <- ggplot(galton, aes(x=child)) + geom_histogram(fill="salmon", color="black", binwidth=1)
+    g <- g + geom_vline(xintercept=mu, size=3)
+    g <- g + ggtitle(paste("mu = ", mu, " MSE = ", round(mse, 2), sep=""))
+    g
+}
+
+# create a slider that allows the mean to be dragged from 62 to 74 and calculate the mean sum of squared errors at each estimate of mu 
+# manipulate::manipulate(myHist(mu), mu=slider(62, 74, step=0.5))
+# (note that the code one line above is commented out because it can only be run in RStudio classic execution, not RMD)
+
+# calculate the mean of the child's height, which is the value of mu minimizing average residual sum of squares
+paste("mean of child height is:", mean(galton$child))
+# show this mean on the histogram by plotting a vertical black bar at its location
+g <- ggplot(galton, aes(x=child)) + geom_histogram(fill="salmon", color="black", binwidth=1)
+g <- g + geom_vline(xintercept=mean(galton$child), size=3)
+g
+```
+
+**C. Basic Least Squares via Dalton Example**
+
+- To see how the parent's height correlate with children's, plot a scatterplot
+
+```{r}
+# plot child's height as a function of their parent's
+ggplot(galton, aes(x=parent, y=child)) + geom_point()
+```
+
+- Imagine that the y-intercept is set at zero (the regression line is forced through the origin), then the slope, beta, that minimizes the sum of squared errors is the value of beta that minimizes the sum of y(i) minus x(i) times beta squared
+- Regression should typically not be forced through the origin, and typically can only be done if you subtract the means from both data sets to normalize the data sets around the origin
+- The regression line takes each x(i) point, scales it by the slope (beta), and calculates the vertical distance of that product from y(i) and squares it. The sum of all these values must be minimized to obtain the optimal regression line.
+
+```{r}
+### Plot different regression lines through de-meaned data
+# load the father/son data set and de-mean the data
+library(UsingR)
+data(father.son)
+y <- (father.son$sheight - mean(father.son$sheight)) / sd(father.son$sheight)
+x <- (father.son$fheight - mean(father.son$fheight)) / sd(father.son$fheight)
+rho <- cor(x, y) # calculate rho as the correlation between these two variables
+
+# plot different lines through the centered data including the vertical line, horizontal line, a slope of 1, rho & the inverse of rho (all of these go through the origin which is fine because the data are de-meaned)
+library(ggplot2)
+g = ggplot(data.frame(x, y), aes(x = x, y = y))
+g = g + geom_point(size = 5, alpha = .2, colour = "black")
+g = g + geom_point(size = 4, alpha = .2, colour = "red")
+g = g + geom_vline(xintercept = 0)
+g = g + geom_hline(yintercept = 0)
+g = g + geom_abline(intercept = 0, slope = rho, size = 1)
+g = g + geom_abline(intercept = 0, slope = 1, size = 2)
+g = g + geom_abline(intercept = 0, slope = 1 / rho, size = 1)
+g = g + xlab("Father's height, normalized")
+g = g + ylab("Son's height, normalized")
+g
+```
+
+####*Video 1.5-1.9 Linear Least Squares*
+
+**A. Notation and Background**
+
+- There are important values existing in and between each data set in a linear regression model:
+
+1) Data Points
+- Variables x(1), x(2),...,x(n) is used to describe n data points
+- Similar notation is used for "y", typically the dependent variable
+
+2) Means
+- The empirical mean, x-bar, is the sum of all x(i) in the sample divided by the size of the sample
+- x(i)-tilda is when x(i) is cenetered (take the original x(i) and subtract by x-bar; the average of this new sample of tildas is 0)
+
+3) Dispersion
+- The empirical variance is S^2 (normal population variance calculation but multiplied by 1 / (n - 1)) and the empirical standard deviation is S
+
+3) Normalization
+- Given the previous points, the "normalized" point z(i) is (x(i) - x-bar) / S (a value of 2, for instance, is 2 standard deviations greater than the mean)
+- Normalization is an attempt to make non-comparable data sets comparable
+
+4) Measures of Linear Relationship
+- The correlation of two random variables is the covariance divided by the product of each sample's empirical standard deviation
+- Correlation Facts;
+    - Correlation calculation is commutative
+    - Correlation is bounded between -1 and 1
+    - Correlation of -1 and 1 implies that RVs Y as a function of X fall perfectly on a positive and negatively sloped line, respectively
+    - Correlation measures the strength of the linear relationship between X & Y, with stronger relationships as the correlation approaches -1 or 1
+    - A correlation of X & Y equal to zero implies there is no linear relationship between the two variables
+    
+**B. Linear Least Squares**
+
+- Let y(i) be the height of child i and x(i) be the (average) height of parent i.
+- The best line must be fit such that Child's Height = B(0) + Parent's Height * B(1) (B(0) is the y-intercept; B(1) is the slope)
+- The "best" line in actuality is is the line that minimizes the sum of the squared residuals of the fitted line, or the sum of squares of each (y-intercept minus the slope scaled by the x(i) values) subtracted from y(i) 
+- The least squares model fit to the theoretical line Y = B(0) + B(1)X through the data pairs (x(i), y(i)) with y(i) as the outcome obtains the empirical line Y = B(0)(hat) + B(1)(hat)X 
+    - B(1)(hat) is the correlation of Y & X multiplied by the standard devaition of Y over the standard deviation of X
+    - The slope, B(1)(hat), has the units of Y / X while the intercept, B(0)(hat), has the units of Y
+    - The line passes through point (x-bar, y-bar)
+    - The slope is equal to what would be outputted if you centered/de-meaned the data and did regression through the origin
+    - If the data were normalized, the slope of that regression would be the correlation of Y & X
+
+```{r}
+### 1) show that these above equivalences hold using the Galton dataset
+library(UsingR); data(galton)
+y <- galton$child # dependent variable
+x <- galton$parent # independent variable
+
+# manual derivation
+beta1 <- cor(y, x) * sd(y) / sd(x) # slope
+beta0 <- mean(y) - beta1 * mean(x)
+c(beta0, beta1)
+
+# built in linear regression
+coef(lm(y ~ x))
+
+# note that the slope/y-intercept values obtained by the manual and built-in lm function are equivalent
+
+### 2) show that the slope obtained from centering the data is equivalent to above
+# center the x & y variables
+yc <- y - mean(y) ; xc <- x - mean(x)
+beta1 <- sum(yc * xc) / sum(xc ^ 2)
+c(beta1, coef(lm(y ~ x))[2]) # bind this centered calculated slope coef to the original regression where the slope coef is extracted (note the equivalence)
+
+### 3) Show that the coefficient of normalized height data slope is equal to the correlation
+yn <- (y - mean(y)) / sd(y) ; xn <- (x - mean(x)) / sd(x)
+c(cor(y, x), cor(yn, xn), coef(lm(yn ~ xn))[2]) # the 3 unique calculations of correlation are equal
+```
+
+- NOTE: adding a geom_smooth(method="lm", formula=y~x) attribute to a ggplot2 scatterplot object fits the linear regression line to the scatterplot 
+
+####*Video 1.10 Regression to the Mean*
+
+**A. Regression to the Mean**
+
+- Why do children of tall parents tend to be tall, but not as tall as their parents?
+- Why do the best performing stocks this year tend to perform well but not as well next year?
+- The concept of regression to the mean was invented by Francis Galton in the paper "Regression toward mediocrity in hereditary stature" (1886)
+- If Y & X are IID and paired, then the probability that Y is less than X conditioned on a value of X gets bigger as X approaches very large values

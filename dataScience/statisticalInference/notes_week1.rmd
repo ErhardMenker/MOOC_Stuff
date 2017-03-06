@@ -1,0 +1,110 @@
+Statistical Inference - Week 1
+========================================
+
+####*Video 1.1 Introduction*
+
+- Statistical inference is the process of generating conclusions about a population from a noisy sample
+- Without statistical inference, nothing can be concluded beyond the summary statistics of the data
+- Example: the prediction of an election requires assumptions of uncertainty and given probabilistic results
+- There are many competing different ways to think about statistics (e.g. Bayesians vs frequentists)
+- The JHU course uses the frequentist paradigm (the paradigm used in most introductory statistics and from which most other statistical paradigms are based)
+
+####*Video 2.1 Introduction to Probability*
+
+- Given a random experiment, a probability measure is a population quantity that summarizes the randomness
+- Probability is a conceptual idea that transcends the empirical data
+- Probability takes a possible outcome from the experiment and the rules are based in these Kolmogorov axioms:
+    1) assigns it a number between 0 and 1
+    2) the sum of the partitioning probabilities is 1
+    3) the probability of the union of any two sets of outcoms that are mutually exclusive is the sum of         their individual probabilities
+- Rules of probability 
+    1) The probability that nothing occurs is 1
+    2) The probability that something occurs is 1
+    3) The probability of something is 1 minus the probability that the opposite occurs (complement)
+    4) If an event A implies event B occurs, then the probability of B is at least as great as A
+    5) For any two events, the probability that at least one occurs is the sum of their probabilities          minus the intersection
+    
+####*Video 2.2 Probability Mass Functions*
+
+**A. Motivation for Probability Mass Functions**
+
+- Probability calculus is useful for understanding the rules that probabilities must follow
+- Densities and mass functions for random variables are the best starting point to model randomness
+- IMPORTANT: everything is a population quantity and not something in the empirical data
+
+**B. Random Variables**
+
+- A random variable can be discrete or continuous
+    - A discrete random variable has a countable amount of outcomes (the outcome of a dice roll)
+    - A continuous random variable has an infinite amount of outcomes (a person's Body Mass Index)
+
+**C. Probability Mass Functions Fundamentals**
+
+- A probability mass function (PMF) for a discrete random variable evaluated at a value corresponds to the probability that a random variable takes that value and must satisfy the following criteria:
+    - The probability of each event is non-negative
+    - The sum of all the probabilities is 1
+- Example: A fair coin flip has a Bernoulli distribution (heads & tails each have probability of 0.5)
+
+####*Video 2.3 Probability Density Functions*
+
+**A. Probability Density Functions Fundamentals**
+
+-A probability density function (PDF) models the population of a continuous random variable
+- A PDF is a function showing the probability of each outcome at a specific point
+- PDFs must satisfy some criteria:
+    - The function must be larger than or equal to 0 everywhere
+    - The sum of the probabilities (are under the curve) is 1
+- Example: model a population's IQ using a bell curve centered around 100
+- The probability of an exact event occurring is always 0, so range probabilities are calculated by calculating the area over the range (integrating over that range)
+
+**B. Common Calculations of PDFs**
+
+- The cumulative distribution function (CDF) of a random variable is the probability that the random variable is less than or equal to the inputted paramater value (R syntax: p<densityName(x)>)
+- The survival function is the complement of the cumulative distribution function (calculates the probability that a random variable will exceed the input)
+- Percentiles of a population are the population equivalent of sample quantiles.
+- The percentile of a population at x is the probability that a random sample from the population is less than or equal to x (R syntax: q<densityName(x)>)
+- The median is the 50th percentile
+- Example: the 95th percentile of a distribution is the value of x such that the probability that the value of the random variable is less than or equal to that value is 95%
+
+```{r}
+pnorm(1) # probability that the realization of a standard random normal will be less than or equal to 1
+qnorm(0.5) # what is the median of the standard random normal
+```
+
+####*Video 3.1 Conditional Probability Introduction*
+
+- Conditional probability analysis is the practice of basing probabilities based on additional information that an event falls within a subset of the entire set of events
+- The probability of A given that B occurred is the probability that A & B occurred divided by the probability of B
+
+####*Video 3.2 Bayes' Rule*
+
+- Bayes' Rule is a theorem that gives the conditional probability of A given B occurs by applying measures of the probability of B given A occurs, and the related complements and total probabilities
+- The sensitivity is the probability that a test determines a positive given the person has a disease
+- The specificity is the probability that a test determines a negative given the person has no disease
+- Positive predicted value is the probability a subject has a disease given they tested positively
+- Negative predicted value is the probability a subject has no disease given they tested negatively
+- The prevalence of a disease is the unconditional probability of having a disease
+- A likelihood ratio is the ratio of the probability of testing positive given a disease is had divided by the probability of testing positive given no disease is had (factors in historic error into calculations)
+
+####*Video 3.3 Independence*
+
+- Event A is independent of B if the probability that A occurs is equal to the probability of A occurring given B occurred
+- The probability that independent events A and B occur is the product of their individual probabilities, but doing this calculation without independence of events is incorrect
+- Random variables are IID (independent and identically distributed) if they satisfy:
+    - Independence: statistically unrelated from one another
+    - Identically distributed: drawn from the same population distribution
+- IID random variables are the typical assumption for sampling distributions
+
+####*Video 4.1 Expected Values*
+
+- The main underpinning of statistical inference is that the underlying variability of a population can be modelled with a known density/mass function
+- The mean is the expected value that a random variable will have if a value is randomly drawn
+- The variance/standard deviation is a measure of the population's dispersion
+- For a discrete distribution, the expected value of RV X is the sumproduct of the values of x with their respective probabilities
+
+####*Video 4.3 Expected Values for PDFs*
+
+- An estimator is unbiased if the mean of the population is set equal to the mean of the sample
+- Averaging IID distributions results concentrates the distribution's data around the mean of each distribution, but the expected value for all of these IID distributions is equivalent
+
+    

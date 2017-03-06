@@ -1,0 +1,212 @@
+Practical Machine Learning - Week 3
+==========================================================
+
+####*video 1.1 Predicting With Trees*
+
+**A. Tree Prediction Overview**
+
+- Tree prediction iteratively splits variables into groups until the results of the outcome variable are properly homogeneous/separable 
+- Classification trees are non-linear models so data transformations (logging) may be less important 
+- Prediction trees are commonly used for classification problems but can also be used for regression problems (continuous outcome)
+- Example: Counties were predicted to be won for the Obama-Clinton race via decision tree (if a county was more than 20 percent black, predict Obama won. Otherwise, split on more factors and make conclusions when the result is no longer ambiguous)
+- Pros:
+    - Easy to interpret
+    - Perform well in nonlinear settings (particularly better compared to GLM)
+- Cons:
+    - Can lead to overfitting if no CV is used
+    - Harder to estimate uncertainty
+    - Results can be variable
+    
+**B. Decision Tree Algorithm & Measures**
+
+1) Start with all variables in one group
+2) Find the variable/split that best separates the outcome
+3) Divide the data into two groups ("leaves") on that split ("node")
+4) Within each split, find the best variable/split that separates the outcomes
+5) Continue until the groups are either sufficiently "pure" (that split was highly deterministic of the result) or have too small of observations remaining
+
+- Impurity is the measure of how well a split in a variable predicts the outcome
+    - Misclassification Error: the fraction of misclassified outcomes split at that node (0 is perfect purity because it properly splits every time; 0.5 is no purity because it properly splits half the time)
+    - Gini Index: 1 minus the sum of the squares of the individual probabilities (0 is perfect purity; 0.5 is no purity)
+    - Deviance/Information Gain: take the negative of the sum of the logs of the probabilities (0 is perfect purity; 1 is no purity)
+    
+```{r}
+### Iris DT Example
+library(ggplot2); library(rattle); library(caret)
+
+# show the characteristic names and different types of species in table form (50 of each setosa, versicolor, and virginica)
+data(iris); names(iris); table(iris$Species)
+
+# split observations into training and test sets
+inTrain <- caret::createDataPartition(y = iris$Species, p = 0.7, list = FALSE)
+training <- iris[inTrain, ]; testing <- iris[-inTrain, ]
+dim(training); dim(testing)
+
+# plot the sepal width as a function of pedal width and color by species
+ggplot2::qplot(Petal.Width, Sepal.Width, color = Species, data = training) # there is a clear clustering of petal width by Species that looks like a challenging fit with a linear model
+
+# execute the train algorithm in the caret package using the "rpart" classification method
+modFit <- caret::train(Species ~ ., method = "rpart", data = training)
+print(modFit$finalModel) # sequentially lists out the splits and the classification probabilities
+# plot the dendrogram of the Classification Tree with the rattle package
+rattle::fancyRpartPlot(modFit$finalModel)
+# predict the test set category species values via predict
+predict(modFit, newdata = testing)
+```
+
+####*Video 1.2 Bagging*
+
+**A. Bagging Overview**
+
+- Bagging is a portmanteau for "bootstrap aggregating"
+- When many complicated models are fitted, averaging them can smooth out the bias-variance tradeoff
+- Idea: resample cases (bootstrap) and recalculate predictions, then take the average/majority vote to decide which prediction to actually implement on the data (aggregate)
+- Bagging has similar bias but reduced variance compared to taking one model fit (proof exists)
+- Bagging works best for non-linear models
+- Bagging is often used with trees - this becomes the random forest
+
+```{r}
+### ozone bagging example
+library(ElemStatLearn); data(ozone, package = "ElemStatLearn")
+
+# order the data by ozone levels and show the head of the dataset
+ozone <- ozone[order(ozone$ozone), ]
+head(ozone)
+
+ll <- matrix(NA, nrow = 10, ncol = 155)
+# fill in each 10 of these rows in the ll matrix with predictions
+for (i in 1:10) {
+    # resample the dataset with replacement
+    ss <- sample(1:dim(ozone)[1], replace = TRUE)
+    # sample the corresponding ozone value from the sample and reorder the ozone values
+    ozone0 <- ozone[ss, ]; ozone0 <- ozone0[order(ozone0$ozone), ]
+    # fit a loess curve that shows how temperature is impacted by ozone
+    loess0 <- loess(temperature ~ ozone, data = ozone0, span = 0.2)
+    # predict the ozone values with this loess curve for the ozone data set
+    ll[i, ] <- predict(loess0, newdata = data.frame(ozone = 1:155))
+}
+```
+
+**B. Bagging in caret**
+
+- caret has bagging models that exist in its train function by setting method equal to "bagEarth", "treebag", or "bagFDA"
+- Any model can also be bagged using the bag function in caret
+
+####*Video 1.3 Random Forests*
+
+- Random forests are the application of bagging to decision trees
+- Random forest algorithm:
+    1) Bootstrap samples
+    2) At each split, bootstrap variables
+    3) Grow multiple trees and votes
+- Random forests are accurate, but are susceptible to overfitting, slow speed, and non-interpretability 
+- For an iteration of the RF on a given observation, bootstrap observations from the dataset some amount of times, fit a decision tree over that bootstrap sample, and then apply the decision tree to that observation in each case. Forecast an output probability at the end based on an aggregation of each DT result.
+
+```{r}
+### Iris DT Example
+library(ggplot2); library(rattle); library(caret)
+
+# show the characteristic names and different types of species in table form (50 of each setosa, versicolor, and virginica)
+data(iris); names(iris); table(iris$Species)
+
+# split observations into training and test sets
+inTrain <- caret::createDataPartition(y = iris$Species, p = 0.7, list = FALSE)
+training <- iris[inTrain, ]; testing <- iris[-inTrain, ]
+dim(training); dim(testing)
+
+# execute the random forest on the training dataset (note that method must be set to "rf")
+modFit <- train(Species ~ ., data = training, method = "rf", prox = TRUE)
+modFit
+# predict
+pred <- predict(modFit, testing); testing$predRight <- pred == testing$Species
+table(pred, testing$Species)
+```
+
+####*Video 1.4 Boosting*
+
+**A. Boosting Overview**
+
+- Boosting algorithm:
+    1) Take lots of (possibly) weak predictors
+    2) Weight them by their strengths and add them up to get a strong predictor
+- Start with a set of classifiers, and then create a classifier that combines classification functions 
+    - Goal is to minimize error on training set
+    - Iterative, select one h at each step
+    - Calculate weights based on errors
+    - Upweight missed classifications and select next h
+- The most common boosting algorithm is "Adaboost"
+- Imagine a pair of points arbitrarily exiting on the x-y plane with each point belonging to either group A or B. Boosting will try to classify these points by drawing a partition line and emphasizing a change in the next classification by seeing which points were misclassified in the last iteration. Boosting then aggregates these decision rules based on accuracy at the end of the iterations to make a conclusion decision rule.
+
+**B. Boosting Nuances**
+
+- Boosting can be used with any subset of classifiers
+- One large subclass is gradient boosting
+- R has multiple boosting libraries; differences include how the classification functions and combination rules are chosen
+    - gbm: boosting with trees
+    - mboost: model based boosting
+    - ada: statistical boosting based on additive logistic regression
+    - gamBoost: boosting generalized additive models
+- Most boosting algorithms are available via the caret package
+
+```{r}
+### Wage Boosting Example
+library(ISLR); library(ggplot2); library(caret);
+data(Wage)
+
+# remove the logwage column from the dataset
+Wage <- subset(Wage, select = -c(logwage))
+# split the dataset into training and testing datasets
+inTrain <- caret::createDataPartition(y = Wage$wage, p = 0.7, list = FALSE)
+training <- Wage[inTrain, ]; testing <- Wage[-inTrain, ]
+
+# model wage as a function of all other variables using the "gbm" boosting method, suppressing output via verbose equaling false
+modFit <- train(wage ~ ., method = "gbm", data = training, verbose = FALSE)
+print(modFit)
+
+# plot the results for the prediction of the testing values versus the actual testing values
+ggplot2::qplot(predict(modFit, testing), wage, data = testing) # should be a straight line such that y = x for most accurate prediction
+```
+
+####*Video 1.5 Model Based Prediction*
+
+**A. Model Based Prediction Overview**
+
+- Model prediction assumes that data follows a probabilistic model, so Bayes' tehorem can be used to identify optimal classifiers
+- Model prediction can be good because it can take advantage of structure of the data, can be computationally convenient, and are reasonably accurate on real problems
+- Model prediction can be bad because it makes additional data assumptions and reduces accuracy for incorrect models
+
+**B. Model Based Prediction Algorithm**
+
+- The goal is to build a parametric model for the conditional distribution of the outcome variable as a function of its predictors
+- The approach is to apply Bayes theorem to estimate that an output value is equal to one of the categories based on the value of the predictors
+- Prior probabilities are set in advance and the probability distribution is Gaussian
+- The mean and sigma of the Gaussian distribution are estimated from the data
+- Assign to the class that has the highest estimated probability
+
+- Linear discriminant analysis assumes that the predictor is multivariate Gaussian with equal covariances
+- Quadratic discriminant analysis is the same as linear discriminant analysis, but assumes unequal covariances
+- Model based prediction assumes more complicated versions for the covariance matrix than discriminant analysis
+- Naive Bayes assumes independence between features for model building, which can be a dangerous assumption
+- NOTE: in the caret package, the method selected above is inputted by setting the method argument in the train function
+
+```{r}
+### Iris Model Based Example
+library(ggplot2); library(caret)
+data(iris); names(iris)
+
+# split by training and test set
+inTrain <- caret::createDataPartition(y = iris$Species, p = 0.7, list = FALSE)
+training <- iris[inTrain, ]; testing <- iris[-inTrain, ]
+dim(training); dim(testing)
+
+# build a linear discriminant analysis model & predict the testing DF
+modlda <- caret::train(Species ~ ., data = training, method = "lda"); plda <- predict(modlda, testing)
+# build a naive bayes model & predict the testing DF
+modnb <- train(Species ~ ., data = training, method = "nb"); pnb <- predict(modnb, testing)
+# present the category prediction for each predictor in a joint table
+table(plda, pnb)
+
+# plot the points indicating whether the predictions were the same for these two ML algorithms 
+equalPredictions <- (plda == pnb) # returns a logical stating whether the predictions where equivalent for naive bayes and linear discriminant analysis on this dataset
+ggplot2::qplot(Petal.Width, Sepal.Width, color = equalPredictions, data = testing)
+```

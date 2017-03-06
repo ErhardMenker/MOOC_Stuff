@@ -1,0 +1,56 @@
+Regression Models - Week 4
+=========================================================
+
+####*Video 4.1 General Linear Models*
+
+**A. Linear Models in Review**
+
+- Linear models are the most useful applied statistical technique (but are not without limitations)
+- Linear models have particularly interpretable transformations (e.g. natural log transformation); but sometimes these transformations aren't possible (cannot log a negative value)
+
+**B. Generalized Linear Model Overview**
+
+- Generalized linear models (GLMs) were introduced in a 1972 paper by Nelder and Wedderburn
+- GLMs have three components:
+    1) An exponential family model for the response/random component (includes Poisson, Binomial, Gaussian)
+    2) A systematic/non-random component via a linear predictor
+    3) A link function connects the means of the response/randomness to the linear predictor
+- Assume that the outcome variable is normally distributed and the linear predictor is the sum product of the x values and their respective coefficients; the link function assumes that the value at each point is the mean of the outcome variable (unbiased estimator; varies when the response component is not Gaussian)
+- GLMs have to be solved iteratively/numerically, so it is possible for them to fail because they cannot converge to a solution
+- The expected value of a GLM is the sum product of the values of the predictors and their respective coefficients and the slope interpretation is the same as in the linear model
+- The important results of GLM models are asymptotic (require large sample sizes), so they can fail with small sample sizes
+
+**C. The Variance of GLMs**
+
+- For the linear model, the variance is a constant sigma^2
+- For the Bernoulli/Poisson GLMs, the variance is a function of the mean
+
+####*Video 4.2-4.4 Logistic Regression*
+
+**A. Logistic Regression Overview**
+
+- The outcome of these variables are binary; there is either a success (1) or a failure (0)
+- Example: did a team win or not?
+- These cases are modeled with binomial random variables; successes and failures can happen and in different combinations
+- Honoring a 1 vs 0 dichotomous outcome does not hold because the errors would not be Gaussian (there is a clear upper/lower bound)
+
+**B. The Logit Model**
+
+- The logit models the log of the odds; it models the probability of an event happening as the exponential of the linear regression divided by (one plus the exponential of the linear regression)
+- The y-intercept of a logit model is the log odds of the binary event experiencing a sucess if all of the x-variables are zero
+- The odds ratio is not a probability but is a function of probability (odds ratio of 1 is no difference in odds)
+- The slope on a coefficient is the log odds ratio of win probability for each point scored
+- The exponential of a coefficient is the odds ratio of win probability for each point scored
+- The univariate logit model can have the "S-curve" plotted; this curve shows how each value of the independent variable corresponds to a probability for the dependent variable 
+
+####*Video 4.5-4.6 Poisson Regression*
+
+- Many data take the form of counts (e.g. calls to a call center)
+- The Poisson Distribution is a useful model for counts and rates (count per monitoring time)
+- The Poisson GLM implements the Poisson Distribution fit to data and should be used for count data
+- Another approach is to use a log transformation for count data (this preservers parsimony)
+
+
+
+
+

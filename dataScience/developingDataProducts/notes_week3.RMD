@@ -1,0 +1,218 @@
+Developing Data Products - Week 2
+=========================================================
+
+####*Video 1.1-1.3 R Packages*
+
+**A. R Packages Introduction**
+
+- R packages are mechanisms for extending the basic functionality of R
+- R packages are a collection of R functions and/or data objects
+- R packages are organized in a systematic fashion to minimize inconsistency
+- R packages are written by users/developers everywhere
+
+**B. R Packages Locations**
+
+- They live primarily on CRAN & Bioconductor (tools for biostatistics), but also on GitHub/Bitbucket
+- Packages from CRAN/Bioconductor can be installed via "install.packages()" while GitHub ones can be installed via "install_github()" from the devtools package
+- Packages do not have to be put in a central repository but it makes installation easier
+
+**C. What's the Point?**
+
+- There are reasons to not just "make some code available," and use packages instead:
+    - Documentation is required
+    - Centralized resources like CRAN
+    - Knowledge that minimal standards like reliability/robustness met
+    - Requires maintenance of the package to ensure integrity
+    - Knowledge that the package will load properly
+    
+**D. Package Development Process**
+
+1. Write some code in an R script file (.R)
+2. Make the code available to others
+3. Incorporate R script file into R package structure
+4. Write documentation for user functions
+5. Include supplemental materials (examples, demos, practice datasets, tutorials)
+6. Package up and release!
+7. Package will be submitted to CRAN or Bioconductor but also push source code to Github
+
+- After submission, when problems are found with code, people will expect you to fix it and release a new version with the bugfix
+
+**E. R Package Components**
+
+- An R Package has:
+    - a directory with the name of the R package
+    - a DESCRIPTION file which has info about the package
+    - R code (in the R/ sub-directory)
+    - Documentation (in the man/ sub-directory)
+    - NAMESPACE (optional, but do it)
+    - Full requirements in writing R extensions
+
+- The description file has:
+    - Package: Name of package
+    - Title: Full name of package
+    - Description: longer description of package in one sentence (typically)
+    - VersionL Version number (usually M.m-p format)
+    - Author: name of original authors
+    - Maintainer: Name + email of person who fixes problems
+    - License: License for the source code
+    - Depends: R packages that your package depends on
+    - Suggests: Optional R packages that users may need but not strictly essential
+    - Date: Release date of package
+    - URL: package home page
+    
+- R Code:
+    - Copy R code into the R/ sub-directory
+    - There can be any number of files in this directory
+    - Usually separate out files into logical groups
+    - Code for all functions should be included here and here only
+    
+- The NAMESPACE File:
+    - Used to indicate which functions are exported (public functions; the reason for package's existence)
+    - Exported functions can be called by the user and are considered the public API
+    - Non-exported functions cannot be called directly by the user (but the code can be viewed)
+    - Hides implementation details from users and makes a cleaner package interface
+    - You can also indicate what functions you import from other packages, allowing for your package to use other packages without making other packages visible to the user
+    - Importing a function loads the package but does not attach it to the search list
+    
+- Documentation:
+    - Documentation files (.Rd) placed in man/ sub-directory
+    - Written in a specific markup language
+    - Required for every exported function (another reason to limit exported function)
+    - You can document other things like concepts, package overview, included data sets
+    
+**F. BUilding & Checking**
+
+- R CMD build is a command-line program that creates a package archive file (.tar.gz)
+- R CMD check runs a batter of tests on the package
+- You can run "R CMD build" or "R CMD check" from the command-line using a terminal or command-shell application
+- You can also run them from R using the system() function:
+
+```{r}
+# system("R CMD build newpackage")
+# system("R CMD check newpackage")
+```
+
+- Checking runs a battery of tests including the existence of documentation, whether code can be loaded, runs documentation examples, and checks that documentation matches code
+- Packages can only be put on CRAN if these battery of tests are passed
+
+**G. Getting Started**
+
+- The package.skeleton() function in the utils package creates a "skeleton" R package
+- A "skeleton" R package means that a directory is created with the structure: (r/, man/), DESCRIPTION file, NAMESPACE file, documentation files
+- If there are functions visible in the workspace, it writes R code files to the R/ directory and documentation stubs are created in man/
+- This leaves the developer to fill in the rest!
+
+**H. Package Development Summary**
+
+1. Create a new directory with R/ and man/ sub-directories (just use package.skeleton())
+2. Write a DESCRIPTION file
+3. Copy R code into the R/ sub-directory
+4. Write documentation files in man/ sub-directory
+5. Write a NAMESPACE file with exports/imports
+6. Build and check
+
+####*Video 1.4-1.5 R Classes & Methods*
+
+**A. Classes & Methods Overview**
+
+- R classes & methods are implemented when there is a need to represent new data structures that do not exist yet in R (object oriented programming)
+- Other OOP languages like C++, Java, & Python are not interactive unlike R (interactive means that you can script from the command line; the other languages are compiled and run)
+- Chamber's vision was that beginners of R would first be "users" that utilize existing functions and, as their needs develop, eventually cross over and become "programmers" to develop additional functionality
+- OOP is different in R than in most other languages
+
+**B. Classes & Methods Styles**
+
+- R classes and methods can be divided into 2 types:
+    1) S3 classes/methods are included with version 3 of the S language, informal, and sometimes called old-style classes/methods
+    2) S4 classes/methods are more formal/rigorous, included with R 1.4.0, and called new-style classes/methods
+- For the foreseeable future, S3 & S4 classes/methods are separate systems and each system can be used fairly independently of the other
+- Developers of new project are encouraged to use S4 (Bioconductor) but people still use S3 for "quick and dirty" development
+- Code for implementing S4 classes/methods in R is in the "methods" package and can be loaded via library(methods)
+
+**C. OOP in R**
+
+- A class is a description of a thing and can be defined via setClass() in the methods package
+- An object is an instance of a class and can be created via new()
+- A method is a function that only operates on a certain class of objects
+- A generic function is an R function which dispatches methods and encapsulates a "generic" concept such as plotting or predicting (the generic funtion itself does no computation)
+- A method is the implementation of a generic function for an object of a particular class
+- All objects in R have a class which can be determined by the class function
+
+```{r}
+class(1) # returns numeric
+class(NA) # returns logical
+class("foo") # returns character
+```
+
+- Classes go beyond the atomic classes (numeric, integer, character, logical, complex)
+
+```{r}
+x <- rnorm(100)
+y <- x + rnorm(100)
+fit <- lm(y ~ x)
+class(fit) # an "lm" class
+```
+
+- S4 & S3 style generic functions look different but are conceptually the same
+- Programmers can write new methods for an existing generic or create their own generics and associated methods
+- If a data type does not exist in R, it can be defined with a new class along with the corresponding generics/methods
+
+**D. S3 Classes**
+
+- Simply calling a class name in R shows the namespace it comes from as well as the argument parameters passed in upon actual execution
+
+```{r}
+# show the environment and function arguments the following methods hail from
+mean
+print
+```
+
+- calling methods on a class shows its associated methods
+
+```{r}
+methods("mean") # what kind of methods are associated with the class "mean"?
+```
+
+- When a method is called on an object, R will attempt to execute a method specifically defined for that class. If none exists, the "generic" default function is called
+
+```{r}
+set.seed(2)
+mean(rnorm(100)) # x is numeric but there is no mean method for "numeric" objects! call default mean function
+```
+
+- NEVER call methods directly, instead use the generic function and let the method be dispatched automatically (problem with S3; S4 does not allow direct calls)
+- If new classes are created, you will probably have to write new methods for printing/showing, summary, & plotting
+
+**E. S4 Classes**
+
+- Why would you want to create a new class (expand beyond lists, numerics, data frames, etc)?
+    - To represent new types of data that don't exist in R (gene expression)
+    - New concepts/ideas that haven't been thought of yet (mixed-effects model, a sparse matrix)
+    - To abstract/hide implementation details from the user
+
+- A new class can be defined using the setClass function
+    - At a minimum you need to specify the name of the class
+    - You can also specify data elements that are called "slots"
+    - You can then define methods for the class with the SetMethod function information about a class definition can be obtained with the showClass function
+    
+```{r}
+# create a class called "polygon" that has an x & y numerical coordinate pair
+library(methods)
+setClass("polygon",
+         representation(x = "numeric", y = "numeric"))
+
+# create a plot method for the polygon class via setMethod()
+setMethod("plot", "polygon",
+          function(x, y, ...){
+              plot(x@x, x@y, type = "n", ...)
+              xp <- c(x@x, x@x[1])
+              yp <- c(x@y, x@y[1])
+              lines(xp, yp)
+}) 
+# note the slots of the polygon (the x & y coordinates) are accessed with the @ operator
+
+# create an object from the polygon class
+p <- new("polygon", x = c(1, 2, 3, 4), y = c(1, 2, 3, 1))
+plot(p) # access the plot method which is NOT the default plot method, but rather is the one that was just created for the plot class
+```
+

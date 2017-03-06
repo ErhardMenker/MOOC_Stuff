@@ -1,0 +1,123 @@
+<center> <h2>Reproducible Research - Week 1</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1-1.2 What is Reproducible Research?*
+
+- Great and complicated works of art/science can be reproduced if they are done correctly.
+- There is no agreed upon way to communicate data analysis that covers every situation.
+
+####*Video 1.3-1.5 Reproducible Research - Concepts & Ideas*
+
+**A. Replication**
+
+- The ultimate standard for strengthening scientific evidence is replication of findings and conducting studies with independent investigators, data, analytical methods, laboratories, and instruments
+- Replication is particularly important in studies that impact policy/regulatory decisions
+- Replication is sometimes difficult because...
+    - Lack of time or opportunity
+    - No money
+    - Unique
+
+**B. Why do we need Reproducible Research?**
+
+- The idea of reproducible research is to make analytic data and code available so that others may reproduce findings
+- Reproducible research bridges the middle ground of exact replication and no replication
+- New technologies greatly increases data collection abilities; data are more complex and high dimensional
+- Existing databases can be merged into new "megadatabases"
+- Computing power is greatly increased, allowing more sophisticated analyses that is more challenging to reproduce
+
+**C. The Research Pipeline**
+
+- People often get the ending output of research (just seeing a journal article)
+- What facets of a project being reported are needed for reproducibility?
+    - Data/metadata
+    - The computer code (clearly state the computational procedures that are all executed from raw data       through the reporting of analyses)
+- The two "players" of research:
+    - Authors (want to make their research reproducible)
+    - Readers (want to reproduce the author's research)
+- The unfortunate state of reality now is that many authors just put their data on the web with no documentation.
+
+**D. Literate Statistical Programming**
+
+- An article is a stream of text and code
+- ANalysis code is divided into text and code "chunks"
+- Each code chunk loads data and computes results
+- Presentation code formats (tables, figures, etc)
+- Article text explains the pipeline
+- Literate programs can be "weaved" to produce human-readable documents and "tangled" to produce machine-readable documents (easy to go from machine to human and vice versa)
+- Packages that try to implement literate statistical programming include:
+    - sweave (older and requires knowledge of LaTeX)
+    - Knitr (newer and more easily used since it works with markdown instead of LaTeX)
+
+####*Video 1.6 Scripting Your Analysis*
+
+- The golden rule of reproducibility is to script everything in the data pipeline so every part of the data pipeline is documented
+- This is analogous to a composer writing down the sheet music for everyone to see so the song can continue to be played
+
+####*Video 1.7-1.8 Structure of a Data Analysis*
+
+- The key challenge in data analysis is to know how to formulate the question with a plethora of data and models that can be estimated from them
+- Defining the question is the most powerful dimension reduction tool that can be employed and is the key of structuring a data question (because further steps flow from this formulation)
+- When you get the data...
+    - Try to get the raw data
+    - Reference the source
+    - Data pulls from the internet should be documented with URL and time fetched
+- Cleaning the data
+    - Raw data often needs to be processed
+    - Make sure you understand any pre-processing that occurred
+    - Understand the source of the data
+    - Record any other steps like reformating and subsampling
+    - Determine if the data are good enough (quit if not, since garbage in -> garbage out)
+- The statistical analysis that is executed should be forthcoming from a good understanding of a well formulated question
+- Interpreting results should use the appropriate language (e.g. "correlation" is different from "causes", while "describes" is different from "predicts")
+- Make sure to not only explain/interpret coefficients, but to interpret uncertainty measures as well
+- Challenge the results and be cognizant of steps along the pipeline that could be improved
+- The writing up of results should be done in a way that clearly explains the question and shows relative analyses that are necessary to explain the pipeline or can address challenges
+
+####*Video 1.9 Organizing a Data Analysis*
+
+**A. Presenting the Pipeline Overview **
+
+- There is no universally accepted way to structure every data analysis but there are general tips for good practice
+- There should be a couple of data analysis files in the pipeline:
+    - 1) Include the raw data and the processed data outputted by the script
+    - 2) Report figures, including exploratory and production quality
+    - 3) Present the R code including the raw/unused and final scripts, and any RMD files
+    - 4) Include text files, especially README documentation and written up reports/analyses
+
+**B. Presenting Data**
+
+- Raw data should be stored in an input folder and the metadata documented in detail in the README
+- The raw data's metadata can be documented in the Git log via commit
+- Processed data should be named in a way that is easy to see which script generated the data
+- The processing script and mapping should be recorded in the README
+- Processing data must be "tidy"
+
+**C. Presenting Figures**
+
+- Exploratory figures do not need to be "pretty" but should be understandable to at least the author
+- Final figures should be polished with clear axes and purposefully selected colors (normally only a small portion of figures become "final" figures)
+
+**D. Presenting Scripts**
+
+- Raw scripts that are not in use may be less commented and have gone through multiple versions
+- Final scripts should be clearly commmeneted
+    - Small comments are used frequently explaining what, why, when, how, etc
+    - Big comments precede big sections and explain what the purpose of the block is
+- R markdown files can be used to generate reproducible reports by integrating text and R code
+
+**E. Presenting Text Files**
+
+- READMEs can be used in lieu of RMD files
+- README files should contain step-by-step instructions for project analysis and serves as a "map" to point a reader in the right direction to understand different parts of the pipeline
+- A write up text should tell the "story" of the project but should not include every detail/analyses
+- A write up text file, similar to an empirical paper, should include:
+    - An explanatory title
+    - Introduction (what was the motivation?)
+    - Methods (statistics that were used)
+    - Results (include measures of uncertainty)
+    - Conclusions (include potential problems)
+    - References should be cited as they are referred to in the paper
+
+    
+    
+    

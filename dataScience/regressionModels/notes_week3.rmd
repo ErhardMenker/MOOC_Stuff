@@ -1,0 +1,158 @@
+Regression Models - Week 3
+==============================================================
+
+####*Video 3.1-3.11 Multivariable Regression*
+
+**A. Multivariable Regression Background/Intuition**
+
+- Linear models are by far the most important analytic technique and should be considered before advancing to more complicated machine learning algorithms
+- Multivariable regression looks at the relationship between a predictor and a response while controlling for the impact of other relevant variables
+- Many concepts from univariate regression can be extrapolated to multivariate regression
+    - There is assumed to be a linear impact from an increase in the independent variables on Y
+    - The sum of squared residuals is minimized, but the residual is now calculated by summing all of the x values by the product of their respective slopes
+- The coefficient on a multivariable linear regressor is the impact of that variable on the dependent variable but with the linear effects of all other controlled variables removed
+- If there are n predictor variables, then the Cartesian object that is the best linear unbiased estimate is an (n + 1) hyperplane (e.g. if there are 2 regressors, then the equation is a plane in 3D space where the sum of the squared distances between each point in 3D space to the plane is minimized by the resulting plane)
+
+```{r}
+### multivariable regression simulation example
+n = 100; x = rnorm(n); x2 = rnorm(n); x3 = rnorm(n)
+y = 1 + x + x2 + x3 + rnorm(n, sd = 0.1)
+ey = resid(lm(y ~ x2 + x3))
+ex = resid(lm(x ~ x2 + x3))
+sum(ey * ex) / sum(ex ^ 2) # "val1"
+coef(lm(y ~ x + x2 + x3)) # the coefficient on x is equal to the "val1" 
+```
+
+- The coefficient on a regressor in a multivariable regression is the expected unit change in the dependent variable per a one unit change in that regressor, holding all of the other regressors constant
+- Prediction intervals can be calculated for multivariable regression via the standard error
+- The t-statistic provided in a regression is simply the coefficient divided by its standard error
+- If there is perfect multicollinearity in an R regression model, then R just makes the coefficient and associated statistics for that variable NA (unlike EViews which will error out)
+
+**B. Sign Reversal**
+
+- Coefficients can reverse signs very easily with the addition of another variable (even with both being statistically significant) because of omitted variable bias/Simpson's paradox
+
+```{r}
+### Swiss example
+require(datasets); data("swiss") # fertility and socioeconomic factors for Swiss
+require(GGally); require(ggplot2)
+# plot the dataset
+#g <- GGally::ggpairs(swiss, lower=list(continuous="smooth"), params=c(method="loess"))
+#(function call does not work because params is deprecated option)
+
+# fit a regression of all variables in the dataset (given by ".") on fertility and extract coefs
+summary(lm(Fertility ~ ., data=swiss))$coefficients # our model expects a .17 percent decrease in fertility for every 1% increase in percentage of males involved in agriculture, all else constant
+# regress Fertility on Agriculture alone
+summary(lm(Fertility ~ Agriculture, data=swiss))$coefficients # note that the sign flips and stays significant because of omitted variable bias (when you control for the other relevant variables, we realize that "Agriculture" really has a negative impact on "Fertility" that is not controlled for in univariate regression)
+```
+
+**C. Dummy Variables**
+
+- Often times variables in a regression are not continuous/ordinal but rather represent discrete and categorical choices (e.g. an observation can be Republican, Democrat, or Independent)
+- These variables are represented typically as factor variables in R
+- Example: If a person can be Republican, Democrat, or Independent, then Beta(1) is a 1 for Republican and 0 otherwise while Beta(2) is a 1 for Democrat and 0 otherwise with these being the only regressors (with a y-intercept):
+    - The y-intercept plus Beta(1) is the expected value for Republicans
+    - The y-intercept plus Beta(2) is the expected value for Democrats
+    - The y-intercept is the expected value for Independents (both the R and D coefs are zero here)
+    - Beta(1) - Beta(2) compares Republicans to Democrats
+-The p-values for a regression on just a categorical variable tests to see whether the means of that variable and the reference variable are significantly different (under the t-distribution assumption)
+- The "dummy variable trap" is to include a dummy variable for each categorical variable; one should be excluded and this is the reference level (people who fall into the "dummy variable trap" will fail with perfect multicollinearity)
+- Dummy variables should be used for cases where there is a non-zero mean shift for the dependent variable for the different choices that the categorical dummy variable could take
+- By virtue of R's handling of perfect multicollinearity, if a user falls for the dummy variable trap then R will NA out the last coefficient
+- Which categorical variable is the "reference variable" can be done by explicitly writing out the order of the regressors (via I(<categoryName>)) or by setting the factor equal to a different order via relevel() to place the desired reference level of the factor variable at the beginning of the factor's levels
+
+```{r}
+### load and examine the InsectSprays dataset (note this dataset shows how each type of spray (factor) for an observation corresponds to an insect count (numeric vector))
+require(datasets); data("InsectSprays"); require(stats); require(ggplot2)
+
+# exploratory plots
+g <- ggplot2::ggplot(data=InsectSprays, aes(y=count, x=spray, fill=spray)) # plot how many insect counts there are for each spray category
+g <- g + geom_violin(color="black", size=2) # violin plot
+g <- g + xlab("Type of Spray") + ylab("Insect Count")
+g
+
+# fit a linear model on the categorical type of spray factor
+summary(lm(count ~ spray, data=InsectSprays))$coef # all spray types are included for spray A (avoid dummy variable trap); this means that the intercept is the expectation for spray A and the rest of the coefficients are in comparison to Spray A (add the coefficients to the intercept to get that spray's expected value); the fact that sprays C, D, E have negative coefs (compared to A) makes sense when the violin plot is reexamined
+# fit the same linear model, but generate the variables manually to show how it is done
+summary(lm(count ~ 
+               I(1 * (spray == "B")) + I(1 * (spray == "C")) + I(1 * (spray == "D")) +
+               I(1 * (spray == "E")) + I(1 * (spray == "F")), data=InsectSprays))$coef
+# NOTE: the assumption of normality for this insect count data may be inaccurate because of the 0 lower bound (Poisson)?
+```
+
+**D. Interaction Terms**
+
+- Dummy variables allow for different constant (y-intercept) impacts for different categorical variables, but a categorical variable multiplied by a continuous variable is an interaction term which allows for an additive slope impact for the continuous variable given that the categorical variable is of the value where it is coded to 1
+- This means that interaction terms are statistically useful when, for each of the values of the categorical variable, the estimated slope coefficient by which the independent variable impacts the dependent variable is significantly different 
+
+```{r}
+### Swiss example
+require(datasets); data("swiss") # fertility and socioeconomic factors for Swiss
+# create a variable that is Catholic if over half of the population is Catholic, Protestant otherwise
+swiss$CatholicFactor <- factor(sapply(swiss$Catholic, 
+                                      function (x) if (x > 50) {"Catholic"} else {"Protestant"}))
+# regress Agriculture on Fertility but include the newly created CatholicFactor variable as a dummy variable (note that Catholic is the base case with the coefficient being for Protestant, since Catholic appears as the first level of the factor variable)
+summary(lm(data=swiss, Fertility ~ Agriculture + factor(CatholicFactor)))$coef
+# same as previous regression but now include an interaction term interacting the Catholic factor variable with agriculture
+summary(lm(data=swiss, Fertility ~ Agriculture + factor(CatholicFactor) + 
+                                                            Agriculture * CatholicFactor))$coef
+# in above eq, the interaction term shows how the slope for the agriculture variable should be shifted for Protestant obs 
+```
+
+**E. Multivariable Residuals**
+
+- In multivariable regression, it is still assumed that the residuals are distributed IID Gaussian with mean 0 and variance sigma squared
+- Plotting a linear model object will output 4 different graphs to illustrate the regression's properties
+    1) Leverage points - highlights if there are points in the regression that have a substantial/disproportionate impact on the regression line (tends to be "outliers" by definition, but otherwise equivalent outliers that are closer to xbar will tend to have lower leverage since the regression point must go through (xbar, ybar), just as in a traditional fulcrum)
+    2) Plot the residuals vs the fitted values to see if there are any systematic error patterns (patterns show a lack of fit)
+    3) Residual QQ Plot shows whether the residuals are actually normally distributed
+
+```{r}
+data(swiss); par(mfrow=c(2, 2)) # prepare for 4 plots displayed 2 by 2
+# fit a linear model of Fertility as a function of all the other variables in the swiss DF and plot the different default residual plots
+fit <- lm(Fertility ~ ., data=swiss); plot(fit)
+```
+
+####*Video 3.12-3.14 Model Selection*
+
+**A. Model Selection Impetus**
+
+- Often times there are many different variable combinations that can be used in a multivariable regression; how should this be determined?
+- Parsimony in proper balance is a virtue in data science; being able to understand a lot with a relatively simple model is useful in many circumstances
+- Predictive power is the ability to make proper assertions about the unknown in data science, but modelling is also useful. Modelling is the ability to explain what is going on in the underlying data set
+- Under this criteria, the "right" model is the model that connects the data to a parsimonious statement about what is being studied
+
+**B. Model Variable Categories by Theoretical Knowledge**
+
+- "Known known" variables are variables that should be included and are
+- "Known unknown" variables are variables that should be included but cannot be because of limitations
+- "Unknown unknown" variables are variables that are not even thought to be included in the model and thus are not even considered
+
+**C. Guaranteed Consequenences of Adding Regressors**
+
+- Regardless of the actual values and explanatory of a new regressor, adding a new regressor will...
+    - Increase the standard error of the other regressors/"inflate variance", moreso if the independent variables are highly correlated with one another, since each variable takes away the explanatory power from the other (punishing effect)
+    - Increase the R^2 (rewarding effect)
+- The variance inflation factor (VIF) is the actual increase in variance for regressor "i" caused by multicollinearity compared to the ideal situation where it is orthogonal to the other regressors and thus has zero multicollinearity
+
+**D. Residual Variance Estimation**
+
+- If a model is underfitted, the variance estimation is biased
+- If a model is correct or overfitted, the variance estimate is unbiased
+- If unnecessary variables are included, the variance of the variance is larger than necessary (principal components/factor analysis are used to combat this problem even though they lose parsimony)
+- The need for more complex models can often be counteracted by better experimental design; the alternative is to try to correct for these poor design choices in the modelling stage (this can cause other errors along the way via violation of the correction assumptions!)
+
+**E. Analysis of Variance (ANOVA)**
+
+- Analysis of Variance (ANOVA) can be used to test what layer of a nested model structure should be used
+- ANOVA tests the null hypothesis that the standard error of the regression has not improved by adding additional variable(s) against the alternative that it has improved
+
+```{r}
+require(datasets); data(swiss)
+# estimate 3 equations, each one a superset of the previous one
+fit1 <- lm(Fertility ~ Agriculture, data=swiss)
+fit2 <- lm(Fertility ~ Agriculture + Examination + Education, data=swiss)
+fit3 <- lm(Fertility ~ Agriculture + Examination + Education + Catholic + Infant.Mortality, data=swiss)
+# execute an ANOVA to test the null that the standard error of the regression is statistically indistinguishable between each of the 3 specs
+anova(fit1, fit2, fit3) # the 1st p-value < 0.01 indicates that fit2 is preferable to fit1; the 2nd p-value < 0.01 indicates that fit3 is preferable to fit2 (adding all of the regressors in fit3 contributes positively statistically to explanatory power of how agriculture impacts fertility)
+```

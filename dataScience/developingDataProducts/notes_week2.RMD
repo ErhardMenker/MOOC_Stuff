@@ -1,0 +1,51 @@
+Developing Data Products - Week 2
+==========================================
+
+####*Video 2.1-2.6 R Markdown*
+
+**A. What is R Markdown?**
+
+- R Markdown (RMD) is built into RStudio and allows the creation of HTML, PDF, and Word documents from R
+- RMD turns work in R into more accesible formats
+- RMD documents are reproducible as the source code is run every time the document is generated (literate statistical programming)
+
+**B. Working in RMD**
+
+- To open an RMD, go to: File -> New File -> R Markdown
+- The default for the document is to be HTML but Word & PDF are options as well
+- Ctrl-shift-k knits an RMD into the outputted format immediately after saving it
+
+**C. Formatting in RMD**
+
+- Prefacing a line with "-" indicates that text exists there (unordered bullet)
+- "##" indicates a title follows
+- "###" indicates a top level heading follows
+- "####" indicates a secondary heading follows
+- Bulleted lists that are ordered are denoted by "i." where i is the element's index
+- Surrounding a text with "* <text> *" means that <text> is italicized, surrounding by 2 * means bold
+
+```{r}
+# this is how you input actual R code into the RMD
+```
+
+- RMD defaults to not "echoing" the code (showing the commands that generated the output)
+- Setting eval to FALSE means that the code chunk is not evaluated
+
+**D. Publishing RMDs**
+
+- When an RMD is knitted, the upper right portion gives a "Publish" option which allows the document to be published on RPubs; note that this is accessible to everyone
+- Github is also a great place to present RMDs 
+
+####*Video 2.7-2.12 Leaflet*
+
+**A. What is Leaflet?**
+
+- Leaflet is a JavaScript library that makes libraries in an R environment
+- The CRAN leaflet R package allows the creation of leaflet maps without needing to know any JavaScript
+
+**B. Leaflet Map Fundamentals**
+
+- addMarkers() will create a map at an inputted latitude/longitude and give it an inputted name
+- Piping via %>% is very useful for this library because of chained operations (e.g. adding many distinct markers)
+- Adding many markers can be done via data frame with the marker's name, longitude, and latitude (pipe the DF through the leaflet() function)
+- If points are too close to one another, an option is to make the marker into one cluster and differentiate the point by shading the cluster different colors to correpond to a location

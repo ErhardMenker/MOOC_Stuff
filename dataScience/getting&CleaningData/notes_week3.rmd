@@ -1,0 +1,464 @@
+<center> <h2>Getting & Cleaning Data - Week 3</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 Subsetting & Sorting*
+
+**A. Subsetting**
+
+- Subsetting was covered in R Programming, but this is a review.
+- The symbol "&" and "|" indicates an "and" and "or" for subsetting, respectively.
+- Subsetting on NAs will not produce the actual rows, so the which() command is needed.
+
+```{r echo=TRUE, eval=TRUE}
+set.seed(13435)
+# initialize a 5 by 3 DF
+X <- data.frame("var1"=sample(1:5), "var2"=sample(6:10), "var3"=sample(11:15))
+
+# convert the 1st and 3rd entry of var2 column to NA
+X$var2[c(1,3)] = NA
+X
+
+# subset the first column by index
+X[, 1]
+
+# subset the first column by name
+X[, "var1"]
+
+# subset rows 1 and 2 from the second column
+X[1:2, "var2"]
+
+# subset rows where var1 is less than or equal to 3 AND var3 is greater than 11
+X[(X$var1 <= 3 & X$var3 > 11), ]
+
+# subset rows where var1 is less than or equal to 3 OR var3 is greater than 15
+X[(X$var1 <= 3 | X$var3 > 15), ]
+
+# return the indices of rows where var2 is greater than 8
+X[which(X$var2 > 8), ]
+```
+
+**B. Sorting**
+
+- Sorting can be done via the sort() command with mandatory argument of the structure to be sorted.
+- Optional arguments of sort():
+    - decreasing=TRUE sorts the structure from highest to lowest
+    - na.last=TRUE moves all of the NAs to the end instead of the default of dropping them
+    
+```{r echo=TRUE, eval=TRUE}
+# initialize a 5 by 3 DF
+X <- data.frame("var1"=sample(1:5), "var2"=sample(6:10), "var3"=sample(11:15))
+
+# sort var1 from lowest to highest
+sort(X$var1)
+
+# sort var1 from highest to lowest
+sort(X$var1, decreasing=TRUE)
+
+# sort var2 from lowest to highest, placing any NAs at the end
+sort(X$var2, na.last=TRUE)
+```
+
+**C. Ordering**
+
+- Ordering sorts all of the rows in a data frame by the values in a specific column by the order() command.
+- Inputting more than 1 variables will sort in order of the first, then the second,...,etc in case of ties.
+- The plyr package has the arrange() command which does the above ordering but with cleaner syntax.
+- arrange(X, var) where...
+    - X is the data frame to be sorted
+    - var is the variable to be sorted by
+    - wrapping var in desc() will sort in decreasing order
+
+```{r echo=TRUE, eval=TRUE}
+# initialize a 5 by 3 DF
+X <- data.frame("var1"=sample(1:5), "var2"=sample(6:10), "var3"=sample(11:15))
+
+# order all of the rows in X by the values in var1
+X[order(X$var1), ]
+
+# order all of the rows in X by the values in var1 first, then by var3 to break ties
+X[order(X$var1, X$var3), ]
+
+library(plyr)
+
+# sort X by var1 in ascending order
+plyr::arrange(X, var1)
+
+# sort x by var1 in decreasing order
+plyr::arrange(X, desc(var1))
+```
+
+**D. Adding Rows and Columns**
+
+- Appending rows or columns to an existing data frame can be done using the same command that would subset them, but by then appending a value of the appropriate dimension to it.
+- Rows and columns can be merged together by using rbind() and cbind(), respectively.
+
+```{r echo=TRUE, eval=TRUE}
+# initialize a 5 by 3 DF
+X <- data.frame("var1"=sample(1:5), "var2"=sample(6:10), "var3"=sample(11:15))
+
+# add var4 to the data frame X
+X$var4 <- rnorm(5)
+
+# column concatenate DF X and a variable of 5 random standard normals into a new DF called Y
+Y <- cbind(X, rnorm(5))
+Y
+```
+
+####*Video 1.2 Summarizing Data*
+
+- head(dfName, n) returns the top n rows of the dfName, if blank defaults to 6.
+- tail(dfName, n) is the same as head(), but bottom n rows.
+- summary(dfName) summarizes the data for each column
+- str(dfName) shows summary data in a different way than summary(dfName)
+
+- quantile(columnName, na.rm=TRUE) shows the 0, 25th,...,100th percentiles of the column
+- quantile(columnName, probs=c(0.5, 0.75, 0.9)) shows the percentiles inputted in the probs numeric vector.
+- table(columnName, useNA="ifany") tabulates how many obs of each value are in columnName (defaults to not reporting NAs if useNA is not specified).
+- tables can be multidimensional by specifying multiple columns (shows how many observations equal both values in the table).
+- table() can use the %in% argument to say how many values in a column are equivalent to a specific vector of value(s).
+- Creating logicals using the %in% allows subsetting of DF rows that match a specific value.
+
+- xtabs(<tabulation> ~ <columnNames>, data=dfName) allows the characterization of a DF by outcomes (another way of creating 2 dimensional table)
+
+- sum(is.na(columnName)) # numerical showing how many missing values are in columnName
+- any(is.na(columnName)) # Boolean showing if there are any missing values in columnName
+- all(columnName <logical>) # logical showing if any values in columnName satisfy the logical condition
+
+- colSums(logical(dfName)) # for each column, returns the sum of values satisfying the logical condition
+
+- The bytes size of a structure can be used with the object.size() command
+
+```{r echo=TRUE, eval=TRUE}
+setwd("C:/Data/Analytics_Studies/R/Data_Science_Specialization/Getting&Cleaning_Data")
+# create a data folder in the WD if it does not exist
+if(!file.exists("./data")){dir.create("./data")}
+
+# download a file from online
+fileUrl <- "https://data.baltimorecity.gov/api/views/k5ry-ef3g/rows.csv?accessType=DOWNLOAD"
+download.file(fileUrl, destfile="./data/restaurants.csv")
+
+# place the disk CSV in a handler
+restData <- read.csv("./data/restaurants.csv")
+
+# show the top 3 rows in the DF
+head(restData, n=3)
+
+# show the bottom 7 rows of the DF
+tail(restData, n=7)
+
+# create summary statistics for the columns
+summary(restData)
+str(restData)
+
+# create quantile values
+quantile(restData$zipCode, na.rm=TRUE) # use default percentiles
+quantile(restData$zipCode, probs=c(0.5, 0.75, 0.9)) # overwrite default percentiles with probs()
+
+# create tables
+table(restData$zipCode, useNA="ifany") # how many of each zipcode exists?
+table(restData$councilDistrict, restData$zipCode) # creates a 2 dimensional table reporting the amount of observations that match a given zipCode and District
+table(restData$zipCode %in% c("21212")) # how many obs in zipCode column equal "21212"?
+table(restData$zipCode %in% c("21212", "21213")) # how many obs in zipCode equal "21212" or "21213"?
+
+# execute some column sums
+colSums(is.na(restData)) # for each column, how many NAs are in it?
+all(colSums(is.na(restData)==0)) # logical showing that all columns have zero missings
+restData[restData$zipCode %in% c("21212", "21213"), ] # return rows of restData DF only where the zipCode value is "21212" or "21213"
+
+# summarize Berkeley admissions data
+data(UCBAdmissions)
+DF = as.data.frame(UCBAdmissions) # load the UCBAdmissions DF
+summary(DF) # summarize it
+xt <- xtabs(Freq ~ Gender + Admit, data=DF) # tabulate the frequency by gender and admission on the DF
+xt
+
+# create flat table from warpbreaks data set
+data("warpbreaks")
+warpbreaks = as.data.frame(warpbreaks) # place warpbreaks data set in a data frame
+warpbreaks$replicate <- rep(1:9, len = 54) # create a replicate column
+xt = xtabs(breaks ~., data=warpbreaks) # create a flat table that partitions each table by replicate variable but not breaks (this is another way of showing low-medium-high of a 3 column data set)
+
+# find the size of a randomly generated numerical vector
+fakeData = rnorm(1e5)
+object.size(fakeData) # show the size in default bytes scale
+print(object.size(fakeData), units="Mb") # the same as above but in MBs
+```
+
+####*Video 1.3 Creating New Variables*
+
+**A. Motivation**
+
+- Raw data won't have values that are needed.
+- Data will need to be transformed to reach these values.
+- These values are often just appended as a value into the DF.
+- Commonly created variables:
+    - Missingness indicators
+    - "Cutting up" quantitative variables
+    - Applying transformations
+
+```{r echo=TRUE, eval=TRUE}
+setwd("C:/Data/Analytics_Studies/R/Data_Science_Specialization/Getting&Cleaning_Data")
+# create a data folder in the WD if it does not exist
+if(!file.exists("./data")){dir.create("./data")}
+
+# download a file from online
+fileUrl <- "https://data.baltimorecity.gov/api/views/k5ry-ef3g/rows.csv?accessType=DOWNLOAD"
+download.file(fileUrl, destfile="./data/restaurants.csv")
+```
+
+**B. Sequence Creation**
+
+- Sequences are useful for creating indexes for the data set (looping application).
+- seq() creates sequences between a range and a step, similarly to range() in Python.
+
+```{r echo=TRUE, eval=TRUE}
+s1 <- seq(1, 10, by=2) ; s1 # create an integer vector between 1 and 10, stepping by 2
+
+s2 <- seq(1, 10, length=3) ; s2 # start at 1 and end at 10, fill in intermediate values summing in total to the length of 3
+
+x <- c(1, 3, 8, 25, 100); seq(along = x) # create a 5 index vector that will allow looping through x
+```
+
+**C. Subsetting Variables**
+
+- <columnName> %in% <characterVector> will subset values from the data frame that belong to any of the elements in the characterVector  
+
+```{r echo=TRUE, eval=TRUE}
+restData$nearMe = restData$neighborhood %in% c("Roland Park", "Homeland") # appends a column to restData called nearMe that is True if that row's neighborhood row is "Roland Park" or "Homeland"
+table(restData$nearMe) # find out how many FALSE and TRUE values there will be
+```
+
+**D. Creating Binary Variables**
+
+- The ifelse(<logicalCondition, <val if TRUE>, <val if FALSE>) creates a column that returns the val if TRUE if the condition is TRUE and val if FALSE if the condition is FALSE.
+
+```{r echo=TRUE, eval=TRUE}
+restData$zipWrong = ifelse(restData$zipCode < 0, TRUE, FALSE) # zipWrong column is TRUE if the row's zipCode is less than 0, FALSE otherwise
+table(restData$zipWrong, restData$zipCode < 0) # create a table showing how many times there was a zip code less than zero for a row
+```
+
+**E. Creating Categorical Variables**
+
+- Categorical variables can be used to show how many variables in a column fall in a certain range via the cut(colname, breaks) command which operates on colname by partitioning into the breaks partitioning.
+- The "Hmisc" library has cut2(colname, g=?) categorizes the variables in column into however many groups are specified in the g argument, making for easier cutting
+
+```{r echo=TRUE, eval=TRUE}
+restData$zipGroups = cut(restData$zipCode, breaks=quantile(restData$zipCode)) # insert a column in restData that categorizes the zipCode column into quantiles.
+
+table(restData$zipGroups) # tabulate this new zipGroups column in a table, showing how many of each quantile range belong in the column
+
+table(restData$zipGroup, restData$zipCode) # show how, partitioned by zipCode, the breakdown of the zipGroup variable occurs
+
+require(Hmisc)
+restData$zipGroups = Hmisc::cut2(restData$zipCode, g=4) # cut the zipCode column into 4 quartiles and place it in zipGroups
+table(restData$zipGroups)
+```
+
+**F. Creating Factor Variables**
+
+- Factors are like categorical variables, but they don't bin anything (show how many amount of each variable there is).
+- Factor variables can be created by wrapping the desired column with factor().
+- Levels of factor variables can be placed out of default order by passing the optional levels argument, where levels equals a vector saying how the ordering should occur.
+
+```{r echo=TRUE, eval=TRUE}
+restData$zcf <- factor(restData$zipCode) # place into restData a column called zcf which is a factor of the zipCode column
+restData$zcf[1:10] # extract the first 10 elements of the factor, we can see there are 32 different zip code levels
+class(restData$zcf) # returns "factor"
+
+yesno <- sample(c("yes", "no"), size=10, replace=TRUE) # initialize a 10 element character vector which randomly samples "yes" and "no" as entries.
+yesnofac <- factor(yesno, levels=c("yes", "no")) # convert the yesno character vector to a factor, stipulating that the "yes" level should be listed first.
+relevel(yesnofac, ref="yes") # relevel the factor to make sure "yes starts first"
+as.numeric(yesnofac) # coerces the factor variable to numeric vector which is useful for modelling. The lowest level, or the one listed first, will be called "1" and this is autoincremented for each factor
+```
+
+**G. Mutating Function**
+
+- The mutate function (from plyr) will create a new data frame that mutates the original data frame, but does not actually change that data frame.
+
+```{r echo=TRUE, eval=TRUE}
+require(Hmisc); require(plyr)
+restData2 = mutate(restData, zipGroups=cut2(zipCode, g=4)) # create a new data frame, restData2, that is the old data frame with the zipGroups categorical variable that is created on-the-fly
+```
+
+**H. Common Misc Transforms**
+
+- abs(x) ; absolute value
+- sqrt(x) ; square root
+- ceiling(x) ; rounds x up to the next integer
+- floor(x) ; rounds x down to the next integer
+- round(x, digits=n) ; rounds x to the n'th place
+- signif(x, digits=n) ; rounds x to the specified sigfigs
+- cos(x), sin(x) ; trig functions
+- log(x) ; natural log
+- log2(x), log10(x) ; log at the inputted base
+- exp(x) ; exponentiate x
+
+####*Video 1.4 Reshaping Data*
+
+**A. Tidy Data Goal**
+
+- Data should ultimately be "tidy", meaning...
+    - Each variable forms a column.
+    - Each observation forms a row.
+    - Each table/file stores data about one kind of observation
+    
+**B. Reshape Overview**
+
+- "Melting" a dataset transforms a data series into ids and values.
+- After melting, the dcast() function allows the data frame to be recasted by a specific variable.
+- tapply() can be used to apply an operation for a numerical variable by bining them into a categorical variable (see below example).
+- As always, the tapply() can be executed equivalently by doing a split-apply combination.
+
+- The plyr package allows for speedier summarization.
+
+```{r echo=TRUE, eval=FALSE}
+require(reshape2)
+head(mtcars) # pull in the mtcars built in data set
+
+# melt the data set
+mtcars$carname <- rownames(mtcars) # place in a column "carname" that is each row's name
+carMelt <- melt(mtcars, id=c("carname", "gear", "cyl"), measure.vars=c("mpg", "hp"))
+head(carMelt, n=8) # uses "carname", "gear", and "cyl" as identifiers, but shows the values of "mpg" and "hp"
+
+# recast the melted data set
+cylData <- dcast(carMelt, cyl ~ variable) # for each cylinder, count how many other variables fall in that category (will be the same tabulation for all remaining columns)
+cylData <- dcast(carMelt, cyl ~ variable, mean) # same as above, but mean instead of count
+
+head(InsectSprays) # bring in the InsectSprays data frame
+tapply(InsectSprays$count, InsectSprays$spray, sum) # for each spray category, sum up the count values
+
+spIns = split(InsectSprays$count, InsectSprays$spray) # split the InsectSprays data frame by spray type
+lapply(spIns, sum) # execute the sum on this splitted list
+sapply(spIns, sum) # simplify this into a vector
+
+require(plyr)
+plyr::ddply(InsectSprays,.(spray),summarize,sum=sum(count)) # sum how many variables are in each spray category
+spraySums <- ddply(InsectSprays,.(spray), summarize, sum=ave(count,FUN=sum)) # reports the sum of the category for that spray every time a row in the data frame corresponds to that category
+dim(spraySums) # same dimension as InsectSprays data frame
+```
+
+####*Video 1.5-1.6 dplyr*
+
+**A. dplyr Package Overview**
+
+- dplyr is a package intended to make working with data frames easy.
+- Data frame assumptions:
+    - There is one observation per row
+    - Each column represents a variable or measure or characteristic
+    - (non) relational databases are both supported
+    
+- dplyr background
+    - An optimized and distilled version of plyr package, both developed by Hadley Wickham of RStudio
+    - Greatly simplifies existing functionality in R
+    - Provides a "grammar" for data manipulation
+    - Very fast, written mainly in C++
+    
+- dplyr verbs
+    - select: return a subset of the columns of a data frame
+    - filter: extract a subset of rows from a data frame based on logical conditions
+    - arrange: reorder rows of a data frame
+    - rename: rename variables in a data frame
+    - mutate: add new variables/columns or transform existing variables
+    - summarize: generate summary statistics of different variables in the data frame
+    
+- dplyr properties
+    - The first argument is a data frame.
+    - When a column is referred to, the "dfname$"" does not need to preface it for subsetting.
+    - The result of a dplyr call is always a new data frame.
+    
+**B. dplyr Selection Function**
+
+```{r echo=TRUE, eval=TRUE}
+require(dplyr)
+head(mtcars) # call in the mtcars data frame
+head(dplyr::select(mtcars, cyl:hp)) # select every column between "cyl" and "hp", inclusive
+head(dplyr::select(mtcars, -(cyl:hp))) # return every column EXCEPT between "cyl" and "hp"
+```
+
+**C. dplyr Filter Function**
+
+```{r echo=TRUE, eval=TRUE}
+mtcars2 <- dplyr::filter(mtcars, wt > 2.62 & carb == 4) # return a data frame with rows only that have carb equal to 4 and wt greater than 2.62
+```
+
+**D. dplyr Arrange Function**
+
+```{r echo=TRUE, eval=TRUE}
+mtcars3 <- dplyr::arrange(mtcars, qsec) # sort the mtcars data frame by qsec value
+mtcars3
+
+mtcars4 <- dplyr::arrange(mtcars, desc(qsec)) # same as above, but in decreasing order when inputted column is wrapped in desc()
+mtcars4
+```
+
+**E. dplyr Rename Function**
+
+```{r echo=TRUE, eval=FALSE}
+head(dplyr::rename(mtcars, sec=qsec, car_name=carname)) # same as original data frame, but rename qsec as sec and carname as car_name
+```
+
+**F. dplyr Mutate Function**
+
+```{r echo=TRUE, eval=TRUE}
+mtcars5 <- dplyr::mutate(mtcars, qsec_detrend = qsec - mean(qsec, na.rm = TRUE)) # create a new column called qsec_detrend which is the qsec value at that observation minus the qsec mean
+```
+
+**G. dplyr group_by Function**
+
+```{r echo=TRUE, eval=TRUE}
+mtcars6 <- dplyr::group_by(mtcars, carb) # group the data frame by the carb categories
+dplyr::summarize(mtcars6, hp = mean(hp), qsec = max(qsec)) # for each carb category, show the mean of hp and the maximum of qsec
+```
+
+**H. The dplyr Pipeline Operator**
+
+- The %>% pipes data frames through multiple step transformations which eliminates the need to create temporary data frame variables. 
+- When the %>% pipeline is called, the initial data frame is placed on the end and then operations are subsequently placed after each pipeline. Note that the data frame is no longer placed in each operation, but is referenced before the first %>%.
+
+```{r echo=TRUE, eval=TRUE}
+mt1 <- head(mtcars)
+mt1 %>% rename(drat_new = drat) %>% mutate(carb_detrend = carb - mean(carb))
+```
+
+####*Video 1.7 Merging Data*
+
+- Merging multiple data sets is an often required operation in a project.
+- merge(<df1>, <df2>,...) defaults to merging all columns with common names, but can be overwritten.
+- intersect(names(df1), names(df2),...) shows the names common to all data frames.
+- join in the plyr package will merge based on common names between multiple data sets (will not work on the below example because we had to explicitly match solution_id and id as equal concepts.
+- join the plyr package is great for multiple data frames by using the join_all(dfList) command.
+
+```{r echo=TRUE, eval=TRUE}
+# prep the data set into a handler
+setwd("C:/Data/Analytics_Studies/R/Data_Science_Specialization/Getting&Cleaning_Data")
+if (!file.exists("./data")) {dir.create("./data")}
+fileUrl1 = "https://dl.dropboxusercontent.com/u/7710864/data/reviews-apr29.csv"
+fileUrl2 = "https://dl.dropboxusercontent.com/u/7710864/data/solutions-apr29.csv"
+download.file(fileUrl1, destfile="./data/reviews.csv")
+download.file(fileUrl2, destfile="./data/solutions.csv")
+reviews = read.csv("./data/reviews.csv"); solutions <- read.csv("./data/solutions.csv")
+head(reviews, 2); head(solutions, 2) # note that these data sets are the same except the final column
+
+# merge()
+mergedData = merge(reviews, solutions, by.x="solution_id", by.y="id", all=TRUE) # merge the reviews and solutions DF by solution_id and id (these are the common ids)
+
+mergedData2 = merge(reviews, solutions, all=TRUE) # does not give an identifier key 
+head(mergedData2)
+
+# intersect()
+intersect(names(solutions), names(reviews))
+
+# join in plyr()
+require(plyr)
+# two data frame case (join)
+df1 = data.frame(id=sample(1:10), x=rnorm(10))
+df2 = data.frame(id=sample(1:10), y=rnorm(10))
+plyr::arrange(plyr::join(df1, df2), id) # join x and y, then sort by the id
+# three data frame case (join_all)
+df1 = data.frame(id=sample(1:10), x=rnorm(10)) # initialize the three data frames
+df2 = data.frame(id=sample(1:10), y=rnorm(10))
+df3 = data.frame(id=sample(1:10), z =rnorm(10))
+dfList = list(df1, df2, df2) # create a list of the data frames
+join_all(dfList) # join based on this list from the common id
+
+```

@@ -1,0 +1,374 @@
+<center> <h2>Exploratory Data Analysis- Week 1</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 Principles of Analytic Graphics*
+
+- There are general rules to using analytic graphics intended for use by others.
+
+- Principle 1: Show Comparisons
+    - Evidence for a hypothesis is always relative to another competing hypothesis
+    - Always ask: "compared to what?"
+    - This often involves comparing an experiment group's data values to a control group's
+    
+- Principle 2: Show causality, mechanism, explanation, systematic structure
+    - What is the causal framework hypothesis for understanding the question?
+    - Visualize the variables driving the final result in the way you visualize the causal relationship
+    
+- Principle 3: Show multivariate data (as much data on the plot as possible)
+    - Multivariate data are more than 2 variables
+    - The real world has multiple causal variables behind the dependent variable; show this!
+    - Including all relevant variables reduces the possibility of omitted variable bias
+    
+- Principle 4: Integrate Evidence
+    - Integrate words, numbers, images, diagrams
+    - Data graphics should make use of many modes of data presentation in the final presentation
+    - Don't let the tool drive the analysis, make the plot you want to make!
+    
+- Principle 5: Describe and document the evidence with appropriate labels, scales, sources, and so on
+    - This gives objective context to the resulting graphics and results
+    - Viewers can challenge the data by looking up the primary source making the process more scientific
+    
+- Principle 6: Content is King
+    - The presentation depends on the quality, relevance, and integrity of the content
+    - Aesthetic beauty is worthless without good data and logic tying it all together
+    
+####*Video 1.2-1.3 Exploratory Graphs*
+
+**A. What is an Exploratory Graph?**
+
+- Exploratory graphs are created by the user for his own use. 
+- Graphing can be thought of serving 5 purposes in a data science pipeline:
+    - To understand data properties
+    - To find patterns in data
+    - To suggest modelling strategies
+    - To debug analyses
+    - To communicate results
+- Exploratory graphs are meant to aid in the first 4 of the above listed graphing purposes. They are used by the creator to understand the base hypothesis behind what is impacting the data.
+- Exploratory plots are "quick and dirty" summarizations
+- Characteristics of exploratory graphs:
+    - They are made quickly
+    - A large number are made
+    - The goal is for personal understanding
+    - Axes/legends are generally cleaned up, but not an immediate concern
+    - Color/size are used primarily for underlying stastical information
+    
+**B. Methods of Exploratory Analysis - One Dimension**
+
+- There are different methods of summarizing data that are useful for different situations and variable counts.
+- One dimensional methods:
+    - Key number summary (not a plot, states minimum, maximum, median, minimum, 1st & 3rd quartile)
+    - Boxplots (graphically portrays the key number summary with a box around data center)
+    - Histograms
+    - Density plot
+    - Barplot
+    
+```{R echo=TRUE, eval=FALSE}
+# import air pollution data to answer question: do any counties exceed the standard air pollution?
+if(!dir.exists(./data)) {dir.create(./data)}
+# note this example can't be executed because RD Peng didn't include the website :<
+pollution <- read.csv("./data/avgpm25.csv", 
+                     colClasses=c("numeric", "Character", "factor", "numeric", "numeric"))
+head(pollution)
+
+# key number summary:
+summary(pollution$pm25)
+
+# box plot:
+boxplot(pollution$pm25, col="blue")
+abline(h=12) # draw in a line at a value of 12 to answer question of counties exceeding the standard air pollution
+# histogram:
+hist(pollution$pm25, col = "green")
+hist(pollution$pm25, col = "green", breaks=100) # histogram but changes the number of bars
+rug(pollution$pm25) # plots all of the actual points beneath the histogram
+
+# barplot:
+barplot(table(pollution$region), col="wheat", main="Number of Counties in Each Region") # plot the number of counties in each region by the categorical wheat column
+```
+
+**C. Methods of Exploratory Analysis - Multiple Dimensions**
+
+- Two dimensions plotting methods
+    - Multiple/overlayed 1-D plots (Lattice/ggplot2)
+    - Scatterplots
+    - Smooth scatterplots
+    
+- Three dimensions plotting methods
+    - Overlayed/multiple 2-D plots; coplots
+    - Use color, size, shape to add dimensions
+    - Spinning plots
+    - Actual 3-D plots (not that useful)
+
+```{R echo=TRUE, eval=FALSE}
+# import air pollution data to answer question: do any counties exceed the standard air pollution?
+if(!dir.exists(./data)) {dir.create(./data)}
+# note this example can't be executed because RD Peng didn't include the website :<
+pollution <- read.csv("./data/avgpm25.csv", 
+                     colClasses=c("numeric", "Character", "factor", "numeric", "numeric"))
+head(pollution)
+  
+# boxplot:
+boxplot(pm25 ~ region, data=pollution, col="red") # break down the air pollution by east/west region
+
+# histograms:
+par(mfrow=c(2, 1), mar=c(4, 4, 2, 1))
+hist(subset(pollution, region=="east")$pm25, col="green") # plot the subsetted east
+hist(subset(pollution, region=="west")$pm25, col="green") # plot the subsetted west
+
+# scatterplot:
+with(pollution, plot(latitude, pm25), col=region) # color differently by region to add dimension
+abline(h=12, lwd=2, lty=2) # put in another abline at the critical value of 12
+
+# multiple scatterplots:
+par(mfrow=c(1, 2), mar=c(5, 4, 2, 1))
+with(subset(pollution, region=="west"), plot(latitude, pm25, main="West")) # subset out west and plot
+with(subset(pollution, region=="east"), plot(latitude, pm25, main="East")) # subset out east and plot
+```
+
+####*Video 1.4 Plotting Systems in R
+
+**A. Base Plotting**
+
+- This is the "artist palette" model in that it imitates the artist's painting process
+- Start with a blank canvas and build it up
+- Start with the plot function (or similar)
+- Use annotation functions that will add/modify (test, lines, points, axis, etc)
+
+- Pros and Cons of Base Plotting
+    - Convenient, mirrors how most people would build a plot
+    - Can't adjust a plot's fundamental nature once its started (margins can't be adjusted mid-way)
+    - Difficult to translate to others what has happened (no graphical language) since plot is just a        series of ad hoc R commands.
+
+```{r echo=TRUE, eval=TRUE}
+# sample base plot
+library(datasets)
+data(cars) # pull in the mtcars dataset
+with(cars, plot(speed, dist)) # from the mtcars dataframe, plot speed on x-axis, dist on y-axis
+```
+
+**B. The Lattice System**
+
+- Called in the lattice library
+- Plots are created with a single function call
+- Most useful for conditioning types of plots (coplots): how y changes with x across levels of z
+- Things like margins/spacing set automatically 
+- Good for many plots on a screen
+- Sometimes it is difficult to specify an entire plot in a single function call
+- Annotation in plot is unintuitive
+- Cannot "add" to plot once it is created
+
+```{r echo=TRUE, eval=TRUE}
+# sample lattice plot
+library(lattice)
+state <- data.frame(state.x77, region=state.region)
+xyplot(Life.Exp ~ Income | region, data=state, layout=c(4, 1)) # from state DF, plot life exp as function of income across regions in 4 columns and 1 row
+```
+
+**C. The ggplot2 System**
+
+- Splits the difference between base and lattice in that it doesn't need to be specified at once but still has many defaults. 
+- Automatically deals with spacings, text, titles but allows adds to the plot
+- More intuiutive than lattice
+- Default mode makes many choices but they can be overwritten for user preference
+
+```{r echo=TRUE, eval=TRUE}
+library(ggplot2)
+data(mpg)
+qplot(displ, hwy, data=mpg) # plot variable "hwy" as a functino of "displ"
+```
+
+####*Video 1.5-1.7 Base Plotting Systems*
+
+**A. The Packages Underlying Base Plotting**
+
+- The core plotting and graphics engine in R is encapsulated in the following packages:
+    - graphics: contains plotting functions for the "base" graphing systems, including plot, hist,           boxplot, etc
+    - grDevices: contains all the code implementing the various graphics devices, including X11, PDF,        PostScript, PNG, etc
+
+**B. The Process of Plotting**
+
+- When making a plot, important considerations must be answered:
+    - Where will the plot be made? ON the screen or in a file?
+    - How will the plot be used?
+        - Is the plot for viewing temporarily on the screen?
+        - Will it be put on the web?
+        - Will it be placed in a publication level paper?
+        - Will it be in a presentation
+    - Is there a large amount of data in the plot?
+    - Will the graph need to be resized?
+- What graphic system will allow for these goals: base, lattice, or ggplot2? These packages can NOT be mixed.
+
+**C. Executing a Graph in Base R**
+
+- Base graphics are used most commonly and utilize a very powerful system.
+- There are two phases to creating a base plot:
+    - Initializing a new plot
+    - Annotating (adding to) an existing plot
+- Calling plot(x, y) or hist(x) will launch a graphics device (if not open) and draw a new plot on the device.
+- If the arguments to plot are not of some special class, the default method for plot is called.
+- NOTE: the base graphics system has many parameters that can be tweaked and documented in "?par"
+
+```{r echo=TRUE, eval=TRUE}
+library(datasets)
+hist(airquality$Ozone) # draw a new histogram using the defaults
+
+with(airquality, plot(Wind, Ozone)) # plot a scatterplot of Ozone as a function of Wind
+
+boxplot(Ozone ~ Month, airquality, xlab="Month", ylab="Ozone (ppb)") # box plot with axes labels
+```
+
+**D. Important Base Graphics Parameters/Functions**
+
+- Base Plotting Functions:
+    - plot: make a scatterplot, or other type of plot depending on the class of the plotting object
+    - lines: add lines to a plot, given corresponding vectors of x and y values (connects dots) 
+    - points: add points to a plot
+    - text: add text labels to a plot using specified x, y coordinates
+    - title: add annotations to x, y axis lables, title, subtitle, outer margin
+    - mtext: add arbitrary text to the margins (inner or outer) of the plot
+    - axis: adding axis ticks/labels
+
+- Plot Specific Arguments:
+    - pch: the plotting symbol (defaults to open circle)
+    - lty: the line type (default is solid line), can be dashed, dotted, etc
+    - lwd: the line width, specified as an integer multiple
+    - col: the plotting color, speficied as a number, string, or hex code which are shown via colors()
+    - xlab: character string for the x-axis label
+    - ylab: character string for the y-axis label
+    
+- Environment Arguments (will impact ALL plots)
+    - las: the orientation of the axis labels on the plot
+    - bg: the background color
+    - mar: the margin size
+    - oma: the outer margin size
+    - mfrow: number of plots per row, column (plots are filled row-wise)
+    - mfcol: number of plots per row, column (plots are filled column-wise)
+- Calling par("category") shows the default of the current styling category
+
+```{r echo=TRUE, eval=TRUE}
+library(datasets)
+
+# graph 1 (base graph)
+with(airquality, plot(Wind, Ozone))
+title(main = "Ozone and Wind in New York City") # add a title
+
+# graph 2 (color points)
+with(airquality, plot(Wind, Ozone, main="Ozone and Wind in New York City"))
+with(subset(airquality, Month == 5), points(Wind, Ozone, col="blue")) # color May points in blue
+
+# graph 3 (add legend)
+with(airquality, plot(Wind, Ozone, main = "Ozone and Wind in New York City"), type="n") # create plot but do not place in the data
+with(subset(airquality, Month == 5), points(Wind, Ozone, col="blue")) # color month 5 points blue
+with(subset(airquality, Month == 5), points(Wind, Ozone, col="red")) # color non-month 5 points red
+legend("topright", pch=1, col=c("blue", "red"), legend=c("May", "Other Months")) # create a legend indicating that May values are blue, all others are red
+
+# graph 4 (add a regression line)
+with(airquality, plot(Wind, Ozone, main = "Ozone and Wind in New York City"), pch=20)
+model <- lm(Ozone ~ Wind, airquality) # regress Ozone as a function of Wind
+abline(model, lwd=2) # add a line to the plot, make width thicker
+
+# graph 5 (multiple base plots)
+par(mfrow=c(1, 2)) # overwrite the default and allow for two plots in 1 row, 2 columns
+with(airquality, {
+    plot(Wind, Ozone, main="Ozone and Wind") # graph #1
+    plot(Solar.R, Ozone, main="Ozone and Solar Radiation") # graph #2
+}
+)
+
+# graph 6 (multiple base plots with overarching title)
+par(mfrow=c(1, 3), mar=c(4, 4, 2, 1), oma=c(0, 0, 2, 0))
+with(airquality, {
+    plot(Wind, Ozone, main="Ozone and Wild")
+    plot(Solar.R, Ozone, main="Ozone and Solar Radiation")
+    plot(Temp, Ozone, main="Ozone and Temperature")
+    mtext("Ozone and Weather in New York City", outer = TRUE) # overarching title
+})
+```
+
+**D. Base Plotting Demonstration**
+
+```{r echo=TRUE, eval=TRUE}
+x <- rnorm(100) # initialize a numeric vector
+hist(x) # most basic histogram call with all defaults
+y <- rnorm(100) # initialize a second numeric vector
+plot(x, y) # plot y as a function of x
+par(mar=c(2, 2, 2, 2)) # change the margin on each axis
+plot(x, y)
+plot(x, y, pch=20) # overwrite the fill
+legend("topleft", legend="Data") # add a legend called "Data" to the upper left corner
+abline(lm(y ~ x), lwd=3) # add the regression line of y as a function of x, thickening the line
+z <- rpois(100, 2) # generate 100 random poissons with mean 2
+par(mfrow = c(2, 1)) # plot in 2 rows, 1 column
+plot(x, y, pch=20) # plot y as a function of x
+plot(x, z, pch=19) # plot z as a function of x
+
+g <- gl(2, 50) # generate 50 ones and twos
+plot(x, y, type="n") # plot x and y but do not put in the data
+points(x[g=="Male"], y[g=="male"], col="green") # initialize the x and y Male points to green
+points(x[g=="Female"], y[g=="Female"], col="blue") # initialize the x and y Female points to blue
+points(x[g=="female"], y[g=="female"], col="blue", pch=19) # plot these male and female points
+```
+
+####*Video 1.8 Graphic Devices in R*
+
+**A. Graphic Device Introduction**
+
+- A graphics device is something where you make a plot appear and includes:
+    - A window on your computer
+    - A PDF file
+    - A PNG or JPEG file
+    - A scalable vector graphics (SVG) file
+- The most common place for a plot to be "sent" is the screen device. On Windows this is windows()
+
+**B. How a Plot is Created**
+
+- Method 1: Call a plotting function, the plot appears, annotate plot if necessary
+- This method is useful for quick and dirty exploratory analysis
+
+```{r echo=TRUE, eval=TRUE}
+library(datasets)
+with(faithful, plot(eruptions, waiting)) # make plot appear on screen device
+title(main = "Old Faithful Geyser data") # annotate with a title
+```
+
+- Method 2: Explicitly launch a graphics device, call a plotting function, annotate plot, close graphics device with dev.off() (very important)!
+- This method is used when you need to read the plot to disk to send to someone else
+
+```{r echo=TRUE, eval=TRUE}
+pdf(file=".myplot.pdf") ## open pdf device; create 'myplot.pdf' in working directory
+with(faithful, plot(eruptions, waiting)) # create a scatter plot
+title(main="Old Faithful Geyser data") # annotate plot
+dev.off() # close the connection
+```
+
+**C. Graphics File Devices**
+
+- Two basic types of file devices are vector and bitmap devices
+- Vector formats (better for sparse plots):
+    - pdf: useful for line-type graphs, resizes well, usually portable, better with sparse plots
+    - svg: supports animation and interactivity
+    - win.metafile
+    - postcript: older format, resizes well, usually portable
+- Bitmap formats (represents plots as pixels, better for dense data)
+    - png: bitmapped format, good for line drawings with solid colors, good for plotting many points,        does not resize well
+    - jpeg: good for photographs or natural scenes, uses lossy compression, not great for line drawings
+    - tiff: supports lossless compression
+    - bmp: a native Windows bitmapped format
+    
+**D. Multiple Open Graphics Devices**
+
+- Open multiple graphics devices at once
+- Plotting can only occur on one graphics device at a time
+- The currently active graphics device can be found by calling dev.cur(), assigned integer >= 2
+- dev.set() can overwrite the current device in use
+
+- Copying Plots
+    - dev.copy: copy a plot from one device to another
+    - dev.copy2pdf: copy a plot specifically to a PDF file
+
+```{r echo=TRUE, eval=TRUE}
+library(datasets)
+with(faithful, plot(eruptions, waiting)) # create plot on screen device
+title(main="Old Faithful Geyser data") # add a main title
+dev.copy(png, file="geyserplot.png") # copy plot to a png file in working directory
+dev.off() # close the png device
+```

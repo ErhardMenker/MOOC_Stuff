@@ -1,0 +1,581 @@
+<center> <h2>R Programming - Week 1</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 Introduction*
+
+**A. What the Class is About **
+
+- Basic idea: learn the fundamentals of base R, including data structures and control statements.
+- This class is meant to give the nuts and bolts of R, not to cover advanced topics like machine learning which come later.
+
+####*Video 1.2 Overview and History of R*
+
+**A. What is the ancestry of R? **
+
+- R is a dialect/implementation of the S (born 1976) language developed by John Chambers at Bell Labs.
+- S was implemented as a series of Fortran libraries in order to do statistical modeling.
+- S has since been rewritten in the C language.
+- The S fundamentals have not changed substantially since 1998.
+- S is meant to be a statistical programming language in which users do not consciously think of themselves as programmers, but can slide into programming as the goals become more advanced.
+
+**B. The birth of R **
+
+- R was created in New Zealand in 1991 by Ross Ihaka and Robert Gentleman.
+- R was licensed to GNU in 1995 making it free software.
+- The R Core Group was formed in 1997. Only these people can make changes to the R source code.
+- R version 1.0.0 was released in 2000.
+
+**C. Features of R **
+
+- R syntax is similar to S.
+- R runs on almost any OS (even the Playstation 3)!
+- Frequent updates come out for R every year.
+- R is divided into modular packages.
+- Graphics are sophisticated and better than most stat packages.
+- R is useful for interactive work and has a vibrant user community on stack overflow.
+- R is free, both in the sense of free beer (costs no money) and free speech (the program can be run     anywhere for any purpose and the source code can be changed for personal use).
+
+**D. Drawbacks of R **
+
+- R is based on 40 year old technology.
+- Little built in support for dynamic/3-D graphics.
+- Functionality is based on consumer demand and user contributions, so there is no central corporation   to go to for changes.
+- Objects must generally be stored in physical memory which can lead to some limitations.
+
+**E. Design of R **
+
+- R is divided into 2 parts.
+    - "Base" R: downloaded from the Comprehensive R Archive Network (CRAN) which is the basic                functionality of R.
+    - Everything else: Extra modular packages that can be installed to supplement base R (there are          over 4000 packages on CRAN that meet a standard and the rest can be found on personal websites).
+  
+**F. CRAN R Resources **
+
+- An introduction to R
+- Writing R Extensions
+- R Data Import/Export
+- R installation and Administration (building R from sources)
+- R Internals (how R works at a low level)
+
+####*Video 1.3 Getting Help*
+
+**A. Asking Questions**
+
+- Asking a question in person is easier because of reduced transaction costs.
+- Asking questions via email/discussion board requires more specificity in building up the question's   background.
+- Via email/discussion board, remind users that you've done all previous work in trying to debug the     problem.
+- The email list to send questions to is R-help: r-help@r-project.org
+- The fundamentals of asking a question on a discussion board:
+    - What steps will reproduce the problem?
+    - What is the expected output
+    - What did you see instead?
+    - What version of the product is being used?
+    - What is the operating system?
+- The subject header is important! Include hard information including the R version, function, and OS.
+- Non-technical discussion forum Dos:
+    - Describe the goal.
+    - Be explicit about the question.
+    - Provide the minimum amount of necessary information.
+    - Be courteous.
+    - If found, follow up with the solution for others.
+- Non-technical discussion forum Don'ts: 
+    - Claim you found a bug.
+    - Grovel as a substitute for homework.
+    - Give scant information about what needs to be solved.
+
+**B. Finding Answers**
+
+- Try to find an answer by...
+    - searching the archives of the forum.
+    - searching the web.
+    - reading the manual.
+    - reading a FAQ.
+    - by inspection or experimentation.
+    - by asking a skilled friend (James Lamb).
+    - reading the source code.
+
+####*Video 1.4 R Console Input and Evaluation*
+
+- At the R prompt expressions are typed, assigned with the <- symbol, and can be print() to console.
+- A language's grammar determines if the expression is complete.
+- Placing a # is indicative of a comment, anything to the right is ignored.
+
+```{r echo=TRUE, eval=TRUE}
+#Assign 1 into x and print it
+x <- 1
+print(x)
+```
+
+- Assigning a value into a variable does not automatically print it. This occurs by calling print(variablename) or just variablename.
+- When the object is printed out, the first number printed out in brackets shows what element of the vector is being printed out immediately to its right.
+- The : operator is used to create integer sequences.
+
+```{r echo=TRUE, eval=TRUE}
+#Assign integers 1 to 20 (inclusive) to x.
+x <- 1:20
+print(x)
+```
+
+####*Video 1.5 Data Types - R Objects and Attributes*
+
+- Every data structure in R is classified as an object and falls into 5 "atomic" classes.
+    - character (string)
+    - numeric (real number)
+    - integer
+    - complex 
+    - logical (Boolean)
+    
+- The most basic object is a vector
+    - A vector can only contain objects of the same class.
+    - The list structure allows for different types of object within while being represented as a           vector.
+    - Empty vectors can be created with the vector() function.
+    
+- Numbers
+    - Numbers in R are treated as numeric objects (double precision real numbers).
+    - Explicitly wanting an integer needs to be specified with the L suffix.
+    - Entering 1 gives a numberic, while 1L gives an integer.
+    - Inf representes infinity and can be used in ordinary calculations with reals.
+    - The value NaN ("not a number") is an undefined value.
+    
+- Attributes
+    - R objects can have attributes, including:
+        - Names, dimnames
+        - Dimensions
+        - Class
+        - Length
+    - These objects can be accessed using the attributes() function.
+    
+```{r echo=TRUE, eval=TRUE}
+#Examine the above mentioned numbers/objects  
+x <- vector()
+x
+
+x <- 3L
+x
+
+x <- Inf
+x
+
+x <- NaN
+x
+```
+
+####*Video 1.6 Data Types - Vectors and Lists*
+
+**A. Vector Creation**
+
+- The c() function can be used to create vectors of objects.
+
+```{r echo=TRUE, eval=TRUE}
+x <- c(0.5, 0.6) ## numeric
+x <- c(TRUE, FALSE) ## logical
+x <- c(T, F) ## logical
+x <- c("a", "b", "c") ## character
+x <- 9:29 ## integer
+x <- c(1+0i, 2+4i) ## complex
+```
+
+- The vector(class, length = int) function can also create vectors of default type class of length int.
+
+```{r echo=TRUE, eval=TRUE}
+## create a numeric vector of length 10 (will default to zeros)
+x <- vector("numeric", length = 10)
+x
+```
+
+**B. Vector Coercion**
+
+- If an R vector contains multiple classes, it will try to coerce them to one class by converting some types in a way that is sensible.
+
+```{r echo=TRUE, eval=TRUE}
+#coerce the numeric 1.7 to string "1.7"
+x <- c(1.7, "a")
+x
+
+# coerce the Boolean True to the integer 1 (TRUE maps to 1 in the R language)
+x <- c(TRUE, 2)
+x
+
+# coerce the Boolean True to the string "True"
+x <- c("a", TRUE)
+x
+```
+
+- Calling the class(objectname) on a variable called objectname reveals the class of that     variable.
+- Explicit coercion can occur using the as.class() function.
+- Example: as.numeric(x) converts the vector x to a numeric vector. If x is already a numeric vector, this operation is idempotent.
+
+```{r echo=TRUE, eval=TRUE}
+# create an integer vector from 0 to 6
+x <- 0:6
+class(x) # returns "integer""
+
+# print out the vector as it elements are coerced to different classes
+as.numeric(x) # appears the same at the surface, but no longer integers
+
+as.logical(x) # converts non-zero integers to TRUE
+
+as.character(x) # strings every element
+```
+
+- Coercion can fail (non-sensical coercion) if there is no reasonable way to coerce the different classes into one type. 
+- Non-sensical coercion results in a warning message and NAs for all elements in that vector.
+
+```{r echo=TRUE, eval=TRUE}
+x <- c("a", "b", "c")
+
+as.integer(x) # not sensible to coerce strings to integers, will fail and turn all elements to NAs
+
+x <- c("a", "b", "c")
+
+as.logical(x) # not sensible to coerce strings to logicals either 
+```
+
+- Lists are a special type of a vector that can contain elements of different classes.
+- Lists are a very important data type.
+- Lists print out one element of a time and each element is prefaced with its index.
+- Lists can be created by typing list() and then each element as a comma delimited entry.
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(1, "a", TRUE, 1+ 4i)
+x
+```
+
+####*Video 1.7 Data Types - Matrices*
+
+- A matrix is a vector that has a dimension element added to it.
+- An empty matrix can be created using the matrix(nrow=NULL, ncol=NULL) command.
+- Calling dim(matrixname) indicates how many rows and columns exist in matrixname.
+- Calling attributes(matrixname) reveals the dimensions of the matrix while labeling this     and other attribute names and values that could exist.
+
+```{r echo=TRUE, eval=TRUE}
+m <- matrix(nrow=3, ncol=2) 
+m
+dim(m)
+attributes(m)
+```
+
+- Matrices are filled up by a default of column-wise, meaning that the first column is        filled from top to bottom, followed by the second, and so on.
+
+```{r echo=TRUE, eval=TRUE}
+m <- matrix(1:6, nrow=3, ncol=2) 
+m
+m <- matrix(1:6, nrow=3, ncol=2, byrow=TRUE)
+m
+```
+
+- Matrices can be created by assigning a vector a matrix dimension attribute. The vector's    entries will be filled in the matrix columnwise, as usual.
+
+```{r echo=TRUE, eval=TRUE}
+c <- 1:10
+dim(c) <- c(2,5) #turn the 1,...,10 vector into a 2 by 5 matrix
+c
+```
+
+- Matrices can also be created by column and row binding different vectors of the same        dimensions by calling cbind() and rbind(), respectively.
+
+```{r echo=TRUE, eval=TRUE}
+a <- 1:5
+b <- 6:10
+x <- cbind(a,b) # creates a 5 by 2 matrix with a in first and b in second column
+x
+y <- rbind(a,b) # creates a 2 by 5 matrix with a in first and b in second row
+y
+```
+
+####*Video 1.8 Data Types - Factors*
+
+- Factors represent categorical data.
+- The unique factor elements (levels) can be ordered or unordered.
+- Factors are like integer vectors which each integer entry is labeled.
+- Factors are better than integers to humans; they are self-describing because the name is    presented instead of its corresponding integer.
+- Factor objects are created by calling factor() where the factor() argument is a character   vector.
+- Printing out the factor prints out the character vector first and then prints out the       unique character elements below that.
+- Calling table(factorobj) on factor object factorobj prints out the unique character         elements and below each element how many times that element appears in the factor.
+- Calling unclass(factorobj) prints out the underlying character vector in factor object      factorobj, but coerces it to an integer vector.
+- Factor levels (unique character elements) are defaulted to printing out in alphabetical order, but this can be overwritten by use of the levels=NULL argument in factor creation.
+
+```{r echo=TRUE, eval=TRUE}
+x <- factor(c("yes", "yes", "no", "yes", "no"))
+x # prints out the levels as "no" "yes" because alphabetical since no levels=NULL arg
+x <- factor(c("yes", "yes", "no", "yes", "no"), levels = c("yes", "no"))
+x # overwrote alphabetical ordering with levels=NULL argument
+table(x)
+unclass(x)
+```
+
+####*Video 1.9 Data Types - Missing Values*
+
+- is.na() tests if the inputted element is NA while is.nan() tests if NaN. This operation     returns a logical vector that has the same length as the inputted vector.
+- NA values have a class too depending on what the class of the vector elements are, so there are integer NAs, character NAs, etc.
+- A NaN value is an NA but the opposite is not true.
+
+```{r echo=TRUE, eval=TRUE}
+x <- c(1, 2, NA, 4, 5)
+is.na(x) # returns a 5 element logical vector F, F, T, F, F
+is.nan(x) # 5 element all false logical vector
+
+x <- c(1, 2, NA, NaN, 5)
+is.na(x) # returns F, F, T, T, F
+is.nan(x) # returns F, F, F, T, F
+```
+
+####*Video 1.10 Data Types - Data Frames*
+
+- Data frames are used to store tabular data.
+- Data frames are a special type of list where every element of the list has the same        length (in that every column must have the same amount of rows).
+- Each element of the list is a column and the length of an element is the number of rows.
+- Unlike matrices, data frame classes can vary from column to column.
+- Data frames have an attribute called row.names(), which return the column headers of the   data frame.
+- Data frames can be read into R by calling read.csv() or read.table().
+- Data frames can be converted to a matrix by calling data.matrix(), but this will result    in coercion of all elements to be the same type.
+- Data frames can manually be created by simply specifying a list of vectors that will be    inserted sequentially into the data frame.
+
+```{r echo=TRUE, eval=TRUE}
+# create a 4 by 2 data frame, where the first column is called foo and is composed of integers and the second column bar is a logical vector
+x <- data.frame(foo = 1:4, bar = c(T, T, F, F)) 
+nrow(x) # how many rows exist in x?
+ncol(x) # how many columns exist in x?
+row.names(x) # what are the row names? Just gives rows index 1:4 since none provided
+names(x) # what are the column names? foo bar
+```
+
+####*Video 1.11 Data Types - Names Attribute*
+
+**A. Vector Names**
+
+- Calling names(vec) on vector vec and assigning it to a vector of the same length assigns    each entry in vector vec to that assigned vector. Calling vec prints out the content of     the vector below each entry's name, while calling names(vec) only does the latter.
+
+```{r echo=TRUE, eval=TRUE}
+x <- 1:3
+names(x) # returns NULL, no names have been assigned to this integer vector
+names(x) <- c("foo", "bar", "norf") #assign name "foo" to x entry one and so on...
+x # prints out 1, 2, 3 below titles "foo", "bar", and "norf"
+names(x) # just prints out "foo", "bar", and "norf"
+```
+
+**B. List Names**
+
+- List elements can be named, simply by assigning name=value for each entry in the list       creation.
+
+```{r echo=TRUE, eval=TRUE}
+a = list(a=1, b=2, c=3) # call the first entry a and map it to numeric 1, and so on...
+a # lists print out element by element, these new titles will appear above each element away     from the default behavior of 1,2,...,n for n element lists
+```
+
+**C. Matrix Names**
+
+- Matrix rows and columns can be named by assigning dimnames(matrixname) equal to a two       element list where the first element is a vector naming every row and the second element    is a vector naming every column.
+
+```{r echo=TRUE, eval=TRUE}
+m <- matrix(1:4, nrow=2, ncol=2)
+dimnames(m) = list(c("row1", "row2"), c("col1", "col2"))
+m # prints the matrix and the row/column names properly positioned
+```
+
+####*Video 1.12 Reading Tabular Data into R*
+
+**A. Principal Read-In Functions**
+
+- What functions write in data from foreign sources into R?
+    - read.table(), read.csv(); read in tabular data
+    - readLines(); read in lines of a text file
+    - source(), dget(); read in R code files
+    - load(); read in saved workspaces
+    - unserialize(); read single R objects in binary form
+    
+**B. Reading Data Files with read.table**
+
+- The read.table() function is a very common function for reading data and has some args:
+    - file, the location of a file to be read in
+    - header, logical indicating whether the file has a header line with column names
+    - sep, a string indicating how columns are delimited (tabs? commas?), defaults to space
+    - colClasses, a character vector as long as the column length showing what class each         column belongs to
+    - nrow, the number of rows in the dataset
+    - comment.char, a character string showing what characters denote comments (to be             ignored)
+    - skip, the number of lines to skip from the beginning because they don't have data
+    - stringsAsFactors, True if strings should be viewed as categorical variables (default)
+    
+- For moderately sized datasets, read.table() usually just needs a file input. Default behavior is to...
+    - Skip lines that begin with the inputted comment character (#)
+    - Figure out how many rows there are
+    - Figure out what class of variable each column is, though telling R in colClasses            speeds up execution
+
+- read.csv() is similar to read.table() except the default sep assumed is a comma instead of   a space.
+- Read in data by setting the working directory, using setwd(), to the parent folder          containing the read-in file. The use read.csv(file=NULL) or read.table(file=NULL) where     NULL is replaced with the file name in that folder, including the file type extension.
+
+####*Video 1.13 Reading Large Datasets*
+
+- With much larger datasets, memory becomes an issue with reading in files. This can be       remedied with different methods:
+    - Read the help page for read.table(), very useful document
+    - Set comment.char = "" if there are no comments in the raw dataset
+    - Overtly input the colClasses argument to speed up execution, can be done with sapply
+    - Set nrows, this saves memory and mild overestimates are fine
+    
+####*Video 1.14 Textual Data Formats*
+
+**A. What are textual data?**
+
+- Textual formats are a way of writing out R data into a non-tabular file so that metadata    are preserved.
+- Text formats work better with with version control programs like Git than CSVs.
+- Textual formats are not very space-efficient but are concordant with the Unix philosophy.
+
+**B. Dputting and Dgetting R Objects**
+
+- Dputting is a way to pass data around by deparsing the R object.
+- Dput is R code that deconstructs an R object while dget puts it back together.
+
+```{r echo=TRUE, eval=TRUE}
+y <- data.frame(a = 1, b = "a")
+dput(y) # provides metadata describing y in its deconstruction
+dput(y, file = "y.R") # write out this deconstruction to an R file called "y.R"
+new.y <- dget("y.R") # dget this written out R text back
+new.y # print it out, this should be the initial object
+```
+
+####*Video 1.15 Connections - Interfacing to the Outside World*
+
+- Data are read in using connection interfaces. 
+- Connections are usually to a file, but can be mapped to other places like a URL.
+- Making a connection to a file handler allows the argument saying what you are going to do   to it...
+    - 'a' means to append to what is already written
+    - 'r' means to read
+    - 'w' means to write over what has already been created
+    
+####*Video 1.16 - 1.20 Subsetting
+
+**A. Subsetting Fundamentals**
+
+- Subsetting an object is the act of extracting a portion of methodically extracting a        portion of the object.
+- R subsetting is generally done in three ways:
+    - [ always returns an object of the same class as the original. Allows multiple element       extraction
+    - [[ subsets a list or a data frame, and will return one element always.The class of the       returned object can be different than what it is subsetting from. Note that when            character matches are being requested, they need to be in quotes here but not for $.
+    - $ subsets a list or a data frame by name, else is similar to [[.
+    
+```{r echo=TRUE, eval=TRUE}
+x <- c("a", "b", "c", "c", "d", "a")
+x[1] # returns a one element character vector "a"
+x[1:4] # returns a four element character vector c("a", "b", "c", "c")
+x[x > "a"] # returns all elements of the vector greater than "a"
+u <- x > "a" # returns a logical vector that is false if the condition does not hold
+```
+
+**B. Subsetting a List**
+
+- Lists allow the use of the [[]] and $ subsetting.
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(foo = 1:4, bar = 0.6)
+x[1] # returns the first element of x but treats it as a one element list
+x[[1]] # returns the first element of x but treats it as an integer vector
+x$foo # functionally is the same as x[[1]]
+x[c(1,2)] # returns back x, cannot subset multiple comments via $ or [[]]
+```
+
+- The $ sign can only be used to subset literal indices, or the actual variable name. If the   actual variable name is aliased (computed index), this fails. The [[]], on the other hand,   searches for both literal and computed indices.
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(foo = 1:4, bar = 0.6, norf = c(T, F))
+alias <- "foo"
+x$alias # returns null, because alias is not a literal index
+x[[alias]] # returns the integer vector 1:4, because computed indices work on [[]]
+```
+
+- Passing an integer vector into a [[]] subset will try to subset the subset.
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(a = c(0.5, 0.6), b = c(T, F))
+x[[c(1,2)]] # returns 0.6; goes into the first elem of x and subsets its second elem
+x[[c(2,1)]] # rturns T, goes into the second elem of x and subsets its first elem
+```
+
+**C. Subsetting a Matrix**
+
+- Matrices can be subsetted by referring to the (i,j) entry.
+
+```{r echo=TRUE, eval=TRUE}
+m <- matrix(1:6, 2, 3) # create a matrix with 2 rows, 3 columns, from 1 to 6 columnwise
+m[1, 2] # returns 3
+m[2, 1] # returns 2
+```
+
+- Matrix subset arguments can be left blank. Leaving a row argument blank returns all rows    of the subsetted columns and vice versa. Leaving both blank will return the entire          subsetted structure.
+
+```{r echo=TRUE, eval=TRUE}
+m <- matrix(1:6, 2, 3) # create a matrix with 2 rows, 3 columns, from 1 to 6 columnwise
+m[1, ] # return the entire first row, of c(1, 3, 5)
+m[ ,2] # return the entire second column, or c(3, 4) 
+m[ , ] # returns every row of every column, or simply m
+```
+
+- Subsetting a matrix element returns that matrix as a one element vector instead of a 1 by   1 matrix. This can be changed by setting drop = FALSE (should we drop the dimensions?).     This behavior is not contradictory by returning a different class using the [] since        vectors are an instance of matrices.
+- This behavior is similar to subsetting one row or column, as what is returned is a vector   and not a one dimensional matrix. Again, this can be changed with drop=FALSE.
+
+```{r echo=TRUE, eval=TRUE}
+m <- matrix(1:6, 2, 3)
+m[1,1] # returns 1 as a one dimensional vector
+m[1, 1, drop=FALSE] # returns 1 as a 1 by 1 matrix
+```
+
+**D. Partial Matching**
+
+- The $ and [[]] allow partial matching, or the subsetting of a variable that starts with     the requested name.
+- The $ will do this automatically, but the [[]] defaults to not doing this unless exact=F.
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(aardvark = 1:4)
+x$a # returns the value of aardvark, since no exact match of a but a starts aardvark
+x[["a"]] # returns null, no exact match
+x[["a", exact = F]] # returns the aardvark value, since exact matching dropped
+```
+
+**E. Removing Missing Values**
+
+- A common task is to remove missing values (NAs).
+- Vector entries with NAs can be removed by creating a logical vector using the is.na()       operation, and then eliminating the NAs using this logical vector to subset.
+
+```{r echo=TRUE, eval=TRUE}
+x <- c(1, 2, 3, NA, 4, NA, 5)
+isna_vec <- is.na(x) # returns a logical vector of c(F, F, F, T, F, T, F)
+x[!isna_vec] # returns the vector with no NAs, since the ! operator negates everything in                  isna_vec. this logical is a subsetter on x, only returning trues.
+```
+
+- The complete.cases() is a way to remove any indexed element in multiple vectors if any of   those individual vectors has an NA at that index. The function creates a logical vector     which can be used to subset any of the vectors used and will remove all of the NA           columns.
+
+```{r echo=TRUE, eval=TRUE}
+x <- c(1, 2, 3, NA, 4, NA, 5)
+y <- c(NA, 2, 3, 4, NA, NA, 6)
+not_na_vec <- complete.cases(x, y) #returns logical vector c(F, T, T, F, F, F, T)
+not_na_vec
+x[not_na_vec] # returns c(2, 3, 5)
+y[not_na_vec] # returns c(2, 3, 6)
+```
+
+####*Video 1.21 Vectorized Operations*
+
+- Vector operations in R are vectorized, meaning most operations default to element by        element.
+- Logical comparisons in R default to comparing the input to every element in the vector and   returning a logical the size of the compared vector.
+
+```{r echo=TRUE, eval=TRUE}
+x <- 1:4
+y <- 5:8
+x + y # returns a 4 element vector that adds 1 and 5,...,4 and 8
+x < 2 # returns a 4 dimensional logical where each element says whether the corresponding           element in x is less than 2
+x * y # while some languages might take the dot product of x and y, R returns a 4 element           numeric vector where the elements are 1 * 5,...4 * 8
+```
+
+- Matrix operations also default to element wise operations over true matrix multiplication.   This can be changed, however, by wrapping the operation in %%.
+
+```{r echo=TRUE, eval=TRUE}
+x <- matrix(1:4, 2, 2)
+y <- matrix(5:8, 2, 2)
+x * y   # this is element-wise operation, where each element is operated on by its                    corresponding element
+x %*% y # this is true row-by-column matrix multiplication
+```
+
+- In many operations, R recycles elements being used. That means for two operands in a        statement, if one operand has more elements than the other, than the operand with less      elements is recycled for later evaluations.
+
+```{r echo=TRUE, eval=TRUE}
+x <- 1:4
+y <- c(2, 5)
+x + y # 1 is added to 2 and 2 to 4, then y is recycled so 3 is added to 2 and 4 to 5
+```

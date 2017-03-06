@@ -1,0 +1,64 @@
+Developing Data Products - Week 1 
+==============================================
+
+####*Video 1.1-1.11 Shiny*
+
+**A. What is Shiny?**
+
+- Shiny is a web application framework for R that really only requires knowledge of R (not standard web development tools like JavaScript)
+- Shiny allows the creation of graphical interfaces that allows for users to interact with visualizations, models, and algorithms without knowing the R language
+- The time to create simple yet powerful web-based interactive data products in R is minimized with Shiny
+- Shiny is made by the managers of RStudio
+- shiny is a CRAN package that must be installed and loaded before use
+- A shiny project is a directory that contains at least two R files:
+    1) ui.R (for user interface) controls how your app looks
+    2) server.R controls what your app does
+
+**B. Creating a Shiny Project**
+
+- To create a new Shiny project: 
+    1) go to: File -> New File -> Shiny Web App
+    2) This prompts a New Shiny Web Application dialog box, call it a useful name
+    3) It is best to have multiple files (ui & server), not combined into an app
+    4) Input the titlePanel, sidebarPanel, & mainPanel text in ui.R that will show when the app is run
+    5) Run the app by selecting "run app" in the upper right corner of RStudio or executing "runApp()"
+- The sidebarPanel has inputs while the mainPanel has outputs
+    
+**C. HTML as It Relates to Shiny**
+
+- Knowledge of HTML helps in using Shiny because Shiny uses aspects of HTML
+- The wrapper functions in Shiny use standard HTML tags including h1() - h6(), p(), a(), div(), & span()
+- R code is placed inside a code() wrapper
+- ?builder explains all of the HTML tags that can be used in a Shiny app
+
+**D. Plotting with Shiny**
+
+- Shiny allows the useful presentation of plots
+    1) ui.R -> plotOutput()
+    2) server.R -> renderPlot() 
+- Shiny allows interactive programming where graphing parameters can be changed on-the-fly
+
+**E. Reactivity**
+
+- In order to store dynamic calculations, you have to wrap dynamic expressions in a reactive wrapper
+- A reactive wrapper indicates that the variable continuously updates 
+- It might not be desirable to have immediate reactivity because the value is a part of complicated calculations; in such cases a submit button is used for "delayed reactivity" via submitButton()
+
+####*Video 1.12-1.13 Shiny Gadgets*
+
+- A Shiny Gadget is a function that luanches a small Shiny application
+- Since Shiny Gadgets are function sthey can take values as arguments and return values to the standard R pane
+- Example: choose 2 numbers to multiply by interactively and return answer to the R command line
+
+####*Video 1.14-1.15 GoogleVis*
+
+- GoogleVis leverages Google's graphic capabilities via R
+- Example: plot the value of different variables over time using Google's graphics
+
+####*Video 1.16-1.23 Plotly*
+
+- Plotly is a web application for creating and sharing data visualizations
+- Plotly works with several mainstream programming languages
+- Plotly is a package that must be installed and then loaded before each use
+- plot_ly() is how graphs are called
+- Immediately upon calling the plot, there are options to export via different methods (e.g. RPubs)

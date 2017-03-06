@@ -1,0 +1,89 @@
+Reproducible Research Week 3: Reproducible Research Checklist & Evidence-based Data Analysis
+=============================================================================================
+
+####*Video 1.1 Communicating Results*
+
+- Because of business of managers, results of data analyses need to be presented in a written concise way
+- A research paper has a predefined structure
+    - Title/Author list
+    - Abstract
+    - Body/Results
+    - Supplementary Materials
+    - Code & Data
+- Presenting information via email:
+    - Subject line should summarize findings in one sentence if possible
+    - Email body should have brief description/context of problem and a prescription based on the results
+    - Attach useful files such as R Markdown files and the code/data used to generate the report
+    - Providing a Github repository is a good way of giving a person all of the requisite project info
+
+####*Video 1.2 RPubs*
+
+- RPubs is a service provided by RStudio and can be accessed at rpubs.com (requires registered account)
+- RPubs stores RMarkdowns on a website for everyone to see and comment on (every RPub is public)
+
+####*Video 1.3-1.5 Reproducible Research Checklist*
+
+- Start with good science
+    - Garbage in -> garbage out
+    - Coherent, focus the question to keep problem simplified
+    - Working with good collaborators reinforces good practices
+- Don't do things by hand (aka Excel), including:
+    - Editing spreadsheets to remove outliers and try to do quality control/assurance
+    - Editing tables or figures
+    - Downloading data from a web site instead of using an API
+    - Transforming data manually
+- Things done in hand need to be documented for other users which is very challenging
+- Avoid temptation to think that if something is done just once then it shouldn't be automated
+- Don't "point & click"
+    - GUIs are convenient and intuitive but cannot easily be reproduced by others
+    - Ease of use often correlates with non-reproducibility
+    - A man's gotta code
+- The antidote to doing things by hand is doing by computer
+    - Try to teach a computer to do it via code if a task needs to be done, even if only done once
+    - Because computers need carefully tailored syntax, there is no "fuzziness" about what was done
+    - Teaching a computer almost guarantees reproducibility
+    - Example: instead of downloading data at the website by hand, use the download.file() function
+- Use some version control (e.g. Git)   
+    - Add changes in small chunks
+    - Only commit working versions
+- Keep track of the software environment, including:
+    - Computer architectures (CPU vs GPU)
+    - Operating system (Windows, Mac OS, Linux/Unix)
+    - Software toolchain: Compilers, command shell, programming languages, data analysis software
+    - Supporting software/infrastructure (libraries, R packages, dependencies)
+    - External dependencies (web sites, remote databases)
+    - Version numbers (for every component)
+    - The R function sessionInfo() tells as much information as possible about the software environment
+- Don't save output
+    - Avoid saving data analysis ouptut
+    - Save the data & code that generates the output, not the output itself
+    - Intermediate files need clear documentation
+- Do set a seed in random number generators
+    - Random number generators generate pseudo-random numbers based on an initial seed (indicated by          number ID)
+    - set.seed() is used in R
+    - Setting a seed guarentees the pseudonumbers generated and ensures reproducibility of results
+- Keep the idea of the entire pipeline in your decision making process
+    - Make as much of the data pipeline as reproducible as possible
+    - Data pipelines are complex, making steps reproducible between stages is a rewarding task
+    
+####*Video 1.6-1.10 Evidence-based Data Analysis*
+
+**A. Reproducibility & Replication**
+
+- Replication and reproducibility are not the same (replication is a stricter standard)
+    - Replication focuses on the true validitiy of the scientific claim and whether it can be vindicated       as new data continues to be released and/or is used from different sources
+    - Reproducibility focuses on the validity of the specific data analysis in question with new              investigators but the same data and methods
+- Reproducible research is a compromise between perfect replication and doing nothing toward the end of allowing recreation of an experiment
+- Reproducibility assures transparency and the ability to challenge a process but does not guarentee that the underlying pipeline process is correct
+- Problems must be strictly defined; even simple problems are hard to formulate and can be interpreted  in different ways
+
+**B. Who Reproduces Research?**
+
+- Making research reproducible is important for the end audience of people who need to reproduce
+- There are 3 people who reproduce reserach:
+    - The investigator (who thinks the truth is x)
+    - The scientists who investigate (think the truth is x or y or...and want to be able to scrutinize        your work)
+    - The general public (may not care directly but benefit greatly from the externalities of                 reproducible science)
+    
+    
+    

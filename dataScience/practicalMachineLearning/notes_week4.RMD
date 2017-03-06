@@ -1,0 +1,52 @@
+Practical Machine Learning - Week 4
+===========================================================
+
+####*Video 4.1 Regularized Regression*
+
+- Regularized regression penalizes (shrinks) large coefficient because it acknowledges the possibility that high multicollinearity could increase the coefficient sizes beyond the accurate values
+- Increasing the amount of predictors on the training set will always decrease error, but this model applied to a test set will eventually have increasing error with more predictors because of overfitting the training set (capturing its noise)
+- Regularized regression...
+    1) Can help with the bias/variance tradeoff (increases bias but lowers variance) & model selection
+    2) Can be computationally demanding on large data sets and is often inferior to RF/boosting
+- If two regressors are highly co-linear, regularized regression drops one of the variables and adds the dropped variable's coefficient to the other variable which...
+    - Gives a good but biased estimate of Y
+    - Reduces the variance in the estimate
+- Regularization introduces a penalty term scaled by parameter lambda that shrinks very large coefficient; this is used to reduce complexity and variance
+- As the lambda penalization parameter becomes smaller, we obtain the least squares estimate. As it becomes larger, the coefficient approaches zero.
+- Lasso (a method in caret) shrinks parameters based on the lambda coefficient; all of the slope coefficients become exactly zero for sufficiently large lambda
+
+```{r}
+### prostrate data regularized regression example
+library(ElemStatLearn); data(prostate)
+str(prostate)
+
+# subset the first 5 entries from the prostate set
+small <- prostate[1:5, ] 
+lm(formula = lpsa ~ ., data = small) # this produces NA for some regressors because there are not enough observations
+```
+
+####*Video 4.2 Combining Predictors*
+
+- Predictors can be combined by averaging or voting on the individual esimates
+- Combining classifiers typically improves accuracy but harms interpretability
+- Boosting, bagging, and random forests implement predictor combination in their algorithms
+- The team that won the Netflix prize combined 107 predictors
+- Often times, unweighted averaging is the consistently best method of model averaging
+
+####*Video 4.3 Forecasting*
+
+- Forecasting is typically executed on time series data 
+- There are specific pattern types of time series data:
+    - Trends (long term increase or decrease)
+    - Seasonal patterns (patterns related to time of week, month, year, etc)
+    - Cycles (patterns that rise and fall periodically)
+- Standard prediction models can be used, but with caution
+- Extrapolation can be dangerous, especially when linearity is assumed and you continue to forecast far into the future
+- The "quantmod" package allows forecasting in R
+- Rob Hyndman's "Forecasting: principles and practice" has a lot of information on executing good time series analysis in R
+
+####*Video 4.4 Unsupervised Prediction*
+
+- Sometimes the predictions don't have conventional labels
+- In these cases, you can predict and name clusters and build predictors for them. On the test set, these new clusters are predicted.
+- Clusters should not be overinterpreted since they are, afterall, the product of exploratory data analysis

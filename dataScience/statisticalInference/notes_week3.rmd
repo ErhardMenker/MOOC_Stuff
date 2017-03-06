@@ -1,0 +1,107 @@
+Statistical Inference - Week 3
+=================================================
+
+####*Video 8.1-8.4 T-Intervals*
+
+**A. What is the t-distribution?*
+
+- For smaller sample sizes, the Central Limit Theorem does not fully take form so the t-distribution is used instead
+- As the sample size increases, the t-distribution converges to normality
+- The t-distribution was invented by William Gosset of Guiness Brewery in 1908 (alias: "Student")
+- Because sigma divided by sqrt(n) is exactly standard normal but S divided by sqrt(n) is not, normality can only be assumed for large n when these two divisors are equivalent
+- The only time t-distribution is really used is when it is centered about zero, while the dispersion comes from the degrees of freedom (DF)
+- The confidence interval about the mean is the mean +(-) t-value * the standard error of the mean, or S divided by sqrt(n)
+- Therefore, the reason the t-distribution intervals are wider is because the estimate of sigma / sqrt(n) only limits to zero with large n, and must be estimated with S / sqrt(n) otherwise
+- The t-distribution can be used to construct a confidence interval about what the difference is between two population means to determine if these bounds overlaps zero (implying the population means are statistically indistinguishable)
+
+```{r}
+### execute a t-test assuming that each respective index in the group is paired to one another (there is an experimental correspondence between the first value in group a & b, the second alue in a & b, and so on...)
+
+data(sleep)
+# subset the two pairs of values (10 total, based on the factor group)
+g1 <- sleep$extra[1:10] ; g2 <- sleep$extra[11:20]
+n <- 10
+difference <- g2 - g1
+xbar <- mean(difference) ; s <- sd(difference)
+
+### construct the 95th percent confidence
+# build yourself method
+xbar + c(-1, 1) * qt(.975, n - 1) * s / sqrt(n) 
+# built in R methods
+t.test(difference)
+t.test(g2, g1, paired=TRUE)$conf # just take out the confidence entry
+t.test(extra ~ I(relevel(group, 2)), paired=TRUE, data=sleep) # t-test on the column extra paired based on the group factor variable
+```
+
+**B. t-distribution Assumptions**
+
+- The t-distribution assumes that:
+    1) The data are iid normal (accuracy robust to violation)
+    2) The distribution of the data is symmetric and mound shaped
+- The t-distribution's quantiles converge to normal as the degrees of freedom limits to infinity
+- Skewed data can lead to inaccuracy and so the interval should not be centered about the mean; often solved by logging data
+- Different intervals are available for different distributions like discrete outcomes
+
+**C. Independent Group t-intervals**
+
+- t-distribution intervals can be calculated even when values in each sample are not paired off, but rather samples are purely independent (e.g. a group of subjects are a control group while a completely different group takes a special treatment and a health outcome is measured)
+- independent t-interval calculations assume an equivalent variance between groups; if this assumption is violated, then a different calculation is used that sends the equal variance R argument to FALSE
+- Make sure to subtract the smaller sample mean from the larger one so the results do not get flipped
+
+```{r}
+### execute a t-test assuming that the data are not paired but have equal variances
+
+data(sleep)
+# subset the two pairs of values (10 total, based on the factor group)
+g1 <- sleep$extra[1:10] ; g2 <- sleep$extra[11:20]
+t.test(g2, g1, paired=FALSE, var.equal=TRUE)$conf # defaults to 95% CI
+```
+
+- When in doubt, assume that the variances of the two populations are unequal and set the t.test option of var.equal to FALSE
+- The distribution of the parameters is not a t-distribution under the assumption of unequal variances but can be approximated by the t-distribution
+
+####*Video 9.1-9.4 Hypothesis Testing*
+
+**A. Hypothesis Testing Introduction**
+
+- Hypothesis testing is the formulated process of making statistical conclusions about a well defined problem where the answer depends on the data's values and the underlying assumptions
+- The null hypothesis, or the status quo, is an assertion that is assumed to be true until sufficient evidence shows otherwise
+- The alternative hypothesis covers all the possibilities that must be true if the null hypothesis is rejected (<, >, or =/=)
+- With 2 actual truths and 2 possible decisions in an hypothesis test, 4 outcomes can occur:
+    1) Accept a true null hypothesis
+    2) Reject a false null hypothesis
+    3) Accept a false null hypothesis (Type I Error)
+    4) Reject a true null hypothesis (Type II Error)
+- The level of significance is the probability of a type I error
+
+**B. One & Two - Tailed Tests**
+
+- If a value would be realized in the alternative hypothesis area (rejection region) with a smaller probability than the level of significance set, then the null hypothesis is rejected
+- If the null hypothesis calls for strict equality, then the test is two-tailed because the null can be rejected if a statistic is too large or too small
+- Under a two-tailed test, a test at alpha of 0.05 will be split amongst realized percentiles of (0.025, 0.975), or the largest 2.5th percentile of the distribution; in an otherwise equivalent one-tailed test the rejection region is the top 5th percentile, making the 2-tailed test harder to reject the null hypothesis because the rejection region is further away from the center of the distribution
+
+**C. Hypothesis Testing as They Relate to Confidence Intervals**
+
+- Hypothesis testing that the population mean equals a value mu0 has a strict relationship to the confidence interval where the confidence level is referring to the equivalent hypothesis testing used level of significance:
+    - The set of all possible values that you fail to reject the null hypothesis with is the same as mu's confidence interval
+    - If the confidence interval contains mu0, then we fail to reject the null hypothesis
+- Because of the hypothesis testing - confidence interval equivalence, hypothesis testing for the difference in means under a t-distribution assumption follows the same general rules as the calculation of its confidence interval bounds to maintain equivalence
+
+####*Video 10.1-10.2 P-Values*
+
+- P-values assume that the null hypothesis is true and measure how improbable it is to see the value that has materialized
+- Methodology:
+    1) Define the hypothetical distribution of a statistic assuming the null hypothesis to be true
+    2) Calculate the summary/statistic with the data we have (test statistic)
+    3) Compare what was calculated to the hypothetical distribution and see if the value is "extreme" (far away from the expected value)
+- Formally, the p-value is the probability under the null hypothesis of obtaining evidence at least as extreme as has been obtained
+- If the p-value is small, the null hypothesis is either false, or it is true and a rare event has occurred as compared to the posited underlying distribution
+- Because the p-value is the smallest level of significance with which the null can be rejected, it is called the "attained significance level"
+- For most statistical software tests, a two-tailed test is assumed and the corresponding p-values is provided
+
+```{r}
+# For 15 DF and a 1-tailed test, what is the probability of getting a T-statistic greater than or equal to 2.5?
+pt(2.5, 15, lower.tail=FALSE) # the probability of observing this value given that the null hypothesis of mu equaling the hypothesized value is true is 0.012
+```
+
+-2 + qt(.975, 8) * S / sqrt(8) = 0

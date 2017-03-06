@@ -1,0 +1,213 @@
+<center> <h2>Getting & Cleaning Data - Week 1</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 Obtaining Data Motivation*
+
+- This course covers the basic ideas behind prepping data for analysis.
+    - Finding and extracting raw data
+    - Tidy data principles and how to make data tidy
+    - How to use a variety of R packages to clean data
+- Data are often not cleaned or in an easily accessible form.
+- The goal of this course is to convert raw data using a processing script to get tidy data.
+
+####*Video 1.2 Raw and Processed Data*
+
+**A. What are Data?**
+
+- Data are values of qualitative or quantitative variables, belonging to a set of items.
+    - Qualitative examples: country of origin, sex, treatment
+    - Quantitative examples: height, weight, blood pressure
+
+**B. Raw vs Processed Data**
+
+- Raw data
+    - The original source of the data
+    - Often hard to use for data analyses
+    - Data analysis includes the processing stage
+    - Raw data may only need to be processed once
+- Processed data
+    - Data that is ready for analysis
+    - Processing can include merging, subsetting, transforming, etc
+    - There may be standards for processing
+    - All steps should be documented
+    
+####*Video 1.3 Components of Tidy Data*
+
+**A. Broad Output**
+
+- The components of tidy data processing are:
+    - The raw data set
+    - The tidy data set
+    - A mapping file that explains how raw data are mapped to tidy data
+    - Documentation
+    
+**B. Components of Raw Data**
+
+- Data are raw if...
+    - No software was run on the data after time you get the data
+    - No numbers have been changed
+    - No data have been removed
+    - The data are not summarized 
+    
+**C. Components of Tidy Data**
+
+- Data are tidy if...
+    - Each variable measured is in one column
+    - Each observation is in a different row
+    - There should be one table for each "kind" of variable
+    - Relational tables should be mapped with IDs (keys)
+- A row at the top of each file should have variable names which are human readable
+- Each table should be in a unique file
+
+**D. The Code Book**
+
+- The code book should include...
+    - Information about the variable (including units)
+    - Informatio about the summary choices made
+    - Information about the experimental study design you used
+- A common format for the "code book" is a markdown/text file
+- There should be a section called "study design" thoroughly describing the data collection process
+
+**E. The Instruction List**
+
+- The input for this script is raw data
+- The output is the tidy data
+- There are no user input parameters in the script 
+
+####*Video 1.4 Downloading Files*
+
+**A. File Paths**
+
+- The working directory is the current location in Windows where disk execution is defaulted to
+- The two main working directory commands are:
+    - getwd() returns the current working directory
+    - setwd() changes the current working directory
+- Files in window can be referenced with absolute or relative paths
+    - Absolute paths start from a drive and navigate to the endpoint
+    - Relative: use a "."" to indicate that the directory path starts from the current           folder
+- In Windows, backslashes (/) must be used
+
+**B. Programmatic Directory Creation**
+
+- file.exists("DirectoryName") returns a TRUE if DirectoryName is a valid directory, FALSE otherwise.
+- dir.create("DirectoryName") creates a directory at the DirectoryName location
+
+```{r echo=TRUE, eval = FALSE}
+if(!file.exists("dirname")) {
+    # create file path dirname if it does not exist
+    dir.create("dirname")   
+}
+```
+
+**C. Getting Data from Internet with download.file()**
+
+- download.file() takes as arguments a URL to download and a destination folder to place the file.
+
+```{r echo=TRUE, eval = FALSE}
+fileUrl <- "https://data.baltimorecity.gov/api"
+# take this URL and store it in a DATA folder in the current working directory in CSV called cameras
+download.file(fileUrl, ".\DATA\cameras.csv")
+# list the files that exist in this DATA folder
+list.files("\DATA")
+```
+
+####*Video 1.5 Reading Local Files*
+
+- read.table() is the most common data reading command in R.
+- flexible and robust but requires many parameters
+- reads the data into RAM so big data is problematic
+- important parameters: file, header, sep, row.names, nrows
+    - file is the URL file path
+    - sep is a delimiter between entries
+    - header is a Boolean indicating if the name of the columns is the first line,              otherwise will use default index names
+    - row.names is a vector of the rows in order
+    - nrows is the amount of rows there are
+    - skip is the number of rows to skip
+    - na.strings is the character that missing values should be replaced with
+- read.table() defaults to a tab delimited file, can be overwritten via the sep command
+
+####*Video 1.6 Reading Excel Files*
+
+- The xlsx package allows the reading of Excel files.
+
+```{r echo=TRUE, eval=FALSE}
+require(xlsx)
+# store data from inputted file path in cameraData variable
+cameraData <- read.xlsx(".DATA\cameras.xlsx", sheetIndex = 1, header = TRUE)
+```
+
+- colIndex and rowIndex can be set in the read.xlsx() argument to only bring in a certain subset of the Excel file.
+- write.xlsx function writes out Excel files which is useful for Excel outputs.
+- It is better to store data in a CSV file because it is more standard.
+
+####*Video 1.7 Reading XML*
+
+- XML is a common way of storing data structurally online.
+- On a website, ctrl U shows the XML driving the website.
+- Extracting XML is the basis for most web scraping.
+- XML can be read using the XML library
+- XML can be subsetted much like a standard R list
+
+```{r echo=TRUE, eval=FALSE}
+require(XML)
+fileUrl <- "http://www.w2schools.com/xml/simple.xml"
+doc <- xmlTreeParse(fileUrl, useInternal = TRUE)
+
+rootNode <- xmlRoot(doc) # examine the XML in the top-level XML node
+xmlName(rootNode) # find the variable titles of rootNode
+
+# subset
+rootNode[[1]] # returns the first bracket structure
+rootNode[[1]][[1]] # go into the first bracket structure and return the first element
+```
+
+####*Video 1.8 Reading JSON*
+
+- JSON is lightweight data storage and a common source of structure for APIs.
+- Data in JSON are stored as integers, booleans, strings, etc.
+- JSON can be read using the jsonlite package.
+
+```{r echo=TRUE, eval=FALSE}
+require(jsonlite)
+jsonData <- fromJSON("https://api.github.com/users/jtleek/repos")
+names(jsonData) # returns a data frame with all of the headers
+names(jsonData$owner) # shows the value associated with the owner
+jsonData$owner$login # shows all of the login values associated with the owner
+```
+
+- Data frames can be converted to JSON and vice versa using toJSON and fromJSON, respectively.
+
+```{r echo=TRUE, eval=FALSE}
+# convert data frame to JSON:
+myjson <- toJSON(iris, pretty = TRUE) # write R iris data frame to JSON with nice format
+cat(myjson) # print out the json
+
+# convert JSON back to a data frame:
+iris2 <- fromJSON(myjson) # convert the JSON back to the iris structure DF
+head(iris2) # looks just like the original DF
+```
+
+####*Video 1.9 data.table package*
+
+- Class inheritance from data.frame (all functions on data.frame work on data.table)
+- Written in C, so much faster in functions like subsetting.
+- Requires different syntax than data frame.
+- tables() shows all of the tables in memory
+- Adding columns in the data.table creates a new copy of the table which is problematic for large data sets.
+
+```{r echo=TRUE, eval=TRUE}
+require(data.table)
+DT = data.table(x=rnorm(9), y=rep(c("a", "b", "c"), each=3), z=rnorm(9))
+head(DT, 3)
+tables() # show all the tables in memory
+
+# subsetting
+DT[2, ] # subset the second row
+DT[DT$y == "a", ] # subset the rows whose y value is "a"
+DT[c(1, 2)] # return the second and third row of the DT below the header
+DT[, list(mean(x), sum(z))] # return the mean of x and the sum of z columns
+DT[, table(y)] # show the table value of column y (the type and quantity of all y values)
+DT[, w:=z^2] # append a new column w to DT which everywhere is the square of z
+DT
+DT[, a:=x>0] # append column a to DT which is TRUE if row obs is greater than 0, FALSE otherwise
+```

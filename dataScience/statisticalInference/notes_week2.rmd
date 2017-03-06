@@ -1,0 +1,82 @@
+Statistical Inference - Week 2
+==============================================
+
+####*Video 5.1 Introduction to Variability*
+
+- The variance of a random variable is a measure of spread
+- Variance is the expected value of the square of a random variable's deviation from the mean
+- The square root of the variance is the standard deviation
+- The sample variance is the sum of squared deviations divided by one less than the sample size
+- Increasing the amount of samples of a random variable tends to decrease the variance of the dispersion of the data
+
+####*Video 5.3 Standard Error of the Mean*
+
+- The standard deviation of a statistic (such as a mean) is the standard error of the statistic (how much variability is there about the sample statistic)?
+- The standard error of the mean converges to zero as the sample size increases because there is less of a chance of sporadic deviation
+- The standard error of the mean is S / sqrt(n), because S must stand in for sigma since this population parameter is unknown
+- The sample variance gets more concentrated around the population variance with larger sample sizes
+- The variance of the sample mean is the population variance divided by the sample size n
+- The sample standard deviation, S, explains how variable the population is
+- The sample standard deviation divided by the square root of the sample size, S / sqrt(n), talks about how variable averages of random samples sized at n are from the population
+
+####*Video 6.1-6.3 Common Distributions*
+
+**A. The Binomial Distribution**
+
+- The Bernoulli RV is one trial where a success occurs with probability p and a failure with probability (1 - p)
+- The Binomial RV has success with p and failure with (1 - p) but occurs n times
+
+**B. The Normal Distribution**
+
+- The normal/Gaussian distribution has parameters mean mu and variance sigma-squared
+- When mu equals zero and sigma equals one, the normal distribution is "standard normal"
+- For any normal distribution, the probability that a random variable is within n standard deviations is well defined
+- For a standard normal distribution, the empirical rule states that...
+    - 68% of data is within 1 standard deviation of the mean
+    - 95% within 2 stdev
+    - 99.7% within 3 stdev
+- An arbitrary random variable can be standardized by subtracting its mean and dividing by its standard deviation
+- Important standard normal percentiles
+    - 1.28 -> 90th percentile
+    - 1.645 -> 95th percentile
+    - 1.96 -> 97.5th percentile
+    - 2.33 -> 99th percentile
+    
+**C. The Poisson Distribution**
+
+- The Poisson Distribution models counts
+- The Poisson mean and variance equal
+- Poisson applications
+    - modelling count data (plus if upper bound does not exist)
+    - modelling event time or survival data
+    - modelling contingency tables
+    - approximating the binomial distribution for large n & small p
+    
+####*Video 7.1-7.3 Asymptotics*
+
+**A. Asymptotics Introduction*
+
+- Asymptotics in statistics is the study of the behavior of statistics as the sample size (or some other relevant facet) limits to infinity (or some other relevant number)
+- Asymptotics are essential for making statistical inference and approximations
+- Asymptotics are the basis for empirical probability
+- An estimator is consistent if its value converges to what it wants to estimate (this is a good property because an infinite amount of data will yield the correct statistic iff the estimator is consistent)
+
+**B. The Law of Large Numbers**
+
+- The law of large numbers says that an RVs empirical average converges to its population mean as the sample size increases
+- Example: flipping a fair coin over and over again will result in a convergence to half of the output being heads and the other half tails
+- The Law of Large Numbers says that the sample mean of IID samples is a consistent estimator of the population mean
+- The sample standard deviation/variances of IID variables are consistent as well
+
+**C. The Central Limit Theorem**
+
+- The Central Limit Theorem states that the distribution of the averages of IID variables converges to the normal distribution as the sample size increases
+- The CLT implies that the sample mean of sufficiently large observations is normally distributed with a mean equal to the population mean and variance equal to the population variance divided by the sample size
+- A more skewed distribution means that it takes a large sample size for the distribution to converge to normality
+
+**D. Asymptotics & Confidence Intervals**
+
+- Confidence intervals can be calculated using asymptotics by using the normal distribution to model the population via the CLT to calculate the probability that parameters fall in a range based on observed statistics
+- Example: if 95% of data in a standard normal is between 1.96 and -1.96, then this is the z-statistic used to construct a 95% confidence interval
+- The coverage of a confidence interval shows what percentage of times a random variable falls within the stated bounds. If the coverage is higher than the confidence interval, then the confidence you have in the bounds is likely greater than the stated level of confidence. 
+- If a sample size is too small, then the Central Limit Theorem will give a bounds for a given level that likely overstates the confidence (the t-distribution is used here because it increases the bounds for a given confidence level)

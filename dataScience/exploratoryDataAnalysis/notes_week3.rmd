@@ -1,0 +1,168 @@
+<center> <h2>Exploratory Data Analysis- Week 2</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1-1.3 Hierarchical Clustering*
+
+**A. What is Cluster Analysis?**
+- Clustering organizes things that are "close" into groups.
+- Important facets about clustering:
+    - How do we define close?
+    - How do we group things?
+    - How do we visualize the grouping?
+    - How do we interpret the grouping?
+    
+**B. What is Hierarchical Clustering?**
+- An agglomerative approach
+    - Find closest two points
+    - Merge them together
+    - Repeat
+- Requires:
+    - A defined distance metric between points
+    - A merging approach to combine "close" points together
+- Hierarchical clustering produces a tree (dendrogram) showing how close things are to one another
+- On a given set of data, hierarchical clustering is deterministic since it always picks the closest points at a given stage of the algorithm
+- Hierarchical clustering should primarily be used for exploratory data analysis
+
+**C. Defining "Close"**
+- The definition of "close" is paramount because a garbage definition leads to garbage results
+- Common definitions are:
+    - Euclidean distance (continuous space)
+    - Correlation similarity (continuous space)
+    - Manhattan distance (binary space)
+- The proper definition is the one that makes most since related to the problem
+- Distance can be calculated using the dist() command (defaults to Euclidean)
+
+**D. Dendrograms**
+- Dendrograms picture the clustering process
+- Dendrograms show how points merge together until there is one cluster, from its bottom to top
+- Dendrograms are the results of calling the plot function on an hclust object (see example below)
+- Determining how many clusters there are at a stage of a dendrogram can be determined by cutting a horizontal line across that y point and counting the amount of branches that are intersected
+
+**E. Merging Points**
+- Methodologies for merging clusters:
+    - Average all the x and y coordinates
+    - Complete linkage: use the furthest points in the two clusters
+
+```{r echo=TRUE, eval=TRUE}
+### hierarchical clustering on a dataframe
+# initialize a plot with simulated data
+set.seed(1234)
+par(mar=c(0, 0, 0, 0))
+x <- rnorm(12, mean=rep(1:3, each=4), sd=0.2)
+y <- rnorm(12, mean=rep(c(1, 2, 1), each=4), sd=0.2)
+plot(x, y, col="blue", pch=19, cex=2)
+text(x + 0.05, y + 0.05, labels=as.character(1:12))
+
+dataFrame <- data.frame(x=x, y=y) # create a DF with columns x and y equal to same named variables
+distxy <- dist(dataFrame) # returns a lower triangular dist object showing Euclidean distances between each point
+hClustering <- hclust(distxy) # returns an hclust object when operated on a dist object
+plot(hClustering) # returns a dendrogram
+
+### heatmap
+dataFrame <- data.frame(x=x, y=y)
+set.seed(143)
+dataMatrix <- as.matrix(dataFrame)[sample(1:12), ]
+heatmap(dataMatrix)
+```
+
+####*Video 1.4-1.5 K-Means Clustering*
+
+**A. Intuition Behind K-Means**
+- Hierarchical and k-means clustering are both ways of calculating data point groupings
+- Like hierarchical clustering, k-means clustering needs...
+    - A good definition of distance
+    - A good process to merge close points
+    
+**B. K-Means Algorithm**
+- The process of k-means clustering is:
+    - Fix a number of clusters
+    - Get "centroids" of each cluster
+    - Assign things to closest centroid
+    - Recalculate centroids based on individual points and repeat the process until all iterations done
+- Requires:
+    - A defined distance metric
+    - A number of clusters
+    - An initial guess of the cluster centroids
+- Produces:
+    - Final estimate of cluster centroids
+    - An assignment of each point to clusters
+- K-means clustering is not necessarily deterministic if the centers are set randomly and will differ with the number of iterations
+    
+**C. K-Means in R**
+- Use the kmeans() function with a data frame input
+- Important parameters:
+    - x (data frame)
+    - centers (how many clusters that will result)
+    - iter.max (number of iterations of recalculating the clusters)
+    
+```{r echo=TRUE, eval=TRUE}
+### k-means clustering on a dataframe
+# initialize a plot with simulated data
+set.seed(1234)
+par(mar=c(0, 0, 0, 0))
+x <- rnorm(12, mean=rep(1:3, each=4), sd=0.2)
+y <- rnorm(12, mean=rep(c(1, 2, 1), each=4), sd=0.2)
+plot(x, y, col="blue", pch=19, cex=2)
+text(x + 0.05, y + 0.05, labels=as.character(1:12))
+
+dataFrame <- data.frame(x=x, y=y) # create a DF with columns x and y equal to same named variables
+kmeansObj <- kmeans(dataFrame, centers=3) # create a cluster object with 3 centers
+names(kmeansObj)
+par(mar=rep(0.2, 4))
+plot(x, y, col=kmeansObj$cluster, pch=19, cex=2)
+points(kmeansObj$centers, col=1:3, pch=3, cex=3, lwd=3) # plot the centers
+```
+
+####*Video 1.6-1.8 Dimension Reduction*
+
+**A. Dimension Reduction Motivation**
+- You have n multivariate variables that each have m values
+- The idea is to collapse these variables in a reasonable way to explain the variation simply
+    - Find a new set of multivariate variables that are uncorrelated and explain as much variance as         possible (statistical)
+    - If you put all the variables together in one matrix, find the best matrix created with fewer           variables (lower rank) that explains the original data (data compression)
+    
+**B. Overview of Dimensionality Reduction Solutions**
+- Singular Value Decomposition (SVD) decomposes a data structure into an orthogonal (independent) left and right vector which are scaled by a diagonal matrix
+- Principal Component Analysis (PCA) give sthe same value as the right singular values if you first scale (subtract the mean and divide by standard deviation) the variables
+- The most important part of these analyses is to find the "percent variation explained" that will show how many components are statistically in the data set
+- As more components are used in the data, the outcome becomes more accurate, but there is a tradeoff in efficiency as you eventually converge back to the original data set in the limit
+
+**C. Working with Missing Values**
+- Dimensionality reduction techniques will fail if there are any missing values
+- The impute library places in the average values where missings exist
+
+####*Video 1.9-1.12 Plotting and Color in R*
+
+**A. What's Wrong with the R Defaults?**
+- The default color schemes for most plots in R are horrendous
+- There are ways to overcome this via overwriting defaults
+- The defaults in R map the "col" argument to a specific integer that may not be suitable for data
+
+**B. The grDevices Package**
+- These functions take palettes of colors and interpolate between the colors
+- The function colors() lists the names of colors you can use in any plotting function
+- grDevices has two functions:
+    - colorRamp() takes a palette of colors and returns a function that takes values between 0 and 1         indicating the extremes of the color palette (e.g. gray interpolates between black and white)
+    - ColorRampPalette() takes a palette of colors and returns a function that takes integer arguments       and returns a vector of colors interpolating the palette (numeric expression of colorRamp())
+    
+```{r echo=TRUE, eval=TRUE}
+### colorRamp()
+pal <- colorRamp(c("red", "blue")) # each entry shows the values for red, green, and blue
+pal(0) # only the red entry has positive values
+pal(1) # only the blue object has positive values
+pal(0.5) # cuts integer for red and blue in half from full potential
+# note that green is always zero, indicating green is done by using half for blue and half for red
+
+### colorRampPalette()
+pal <- colorRampPalette(c("red", "yellow"))
+pal(2) # just returns the ends of the spectrum, the representations of yellow and red
+pal(10) # returns the endpoints (representations of yellow and red) and 8 evenly spread out interpolations
+```
+
+**C. RColorBrewer Package**
+- Exists on CRAN, useful for interesting color palettes
+- There are 3 types of palettes
+    - Sequential (data are ordered)
+    - Diverging (data deviate from something such as a mean)
+    - Qualitative (data that are not ordered, such as categorical/factor)
+- Palette information can be used in conjunction with the colorRamp() and colorRampPalette() functions

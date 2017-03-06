@@ -1,0 +1,110 @@
+<center> <h2>Reproducible Research - Week 1</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 Coding Standards*
+
+- Write code in a script
+- Indent code 
+- Limit the code's width (space down when it goes too far to the right)
+- Limit the length of functions to execute just one fundamental activity (modularity)
+
+####*Video 1.2 Markdown*
+
+- Markdown is a very simplified markup language
+- Markdown is a text-to-HTML tool that can easily convert one format to another
+- Communicating different text formatting in Markdown...
+    - Placing equal signs under text makes it look like a markdown file title
+    - *this is italicized*
+    - **this is bold**
+    - ##this is a secondary heading
+    - ###this is a tertiary heading
+    - first item in list
+    - second item in list
+    1. first item in list
+    2. second item in list
+- Links can be inputted in MD by: [textHere](urlHere)
+- Newlines require a double space after the end of a line
+
+####*Video 1.3-1.4 R Markdown*
+
+- Rmd integrates R code with a text readable document
+- What is Markdown?
+    - Allows one to focus on writing rather than formatting (formatting done easily)
+    - Intuitive formatting elements
+    - Easily converted to HTML and other formats
+- What is R Markdown?
+    - The integration of R code and markdown
+    - Allows one to create R code meant for readers that contains live R code
+    - R code is evaluated as part of the processing for markdown
+    - Results from R code are inserted into markdown document
+- How is R Markdown implemented?k
+    - Can be converted to standard Markdown using the knitr R package
+    - Easily implemented in R Studio
+    - The resulting PDF or HTML should not be edited, just the underly RMD file should be
+    
+####*Video 1.5-1.8 Knitr*
+
+**A. Literate Statistical Programming**
+
+- Literate statistical programming promotes the integration of machine code and human readable text in one file (e.g. R Markdown)
+- An empirical project is a stream of text & code (therefore, writeups alter between text and code)
+- Literate programs can be "weaved" into human-readable documents (e.g. a knitted RMD file) and "tangled" into machine-readable documents (code files)
+
+- Literate Programming Pros:
+    - text and code are in one place and in a logical order
+    - data and results automatically update with new code
+    - program breaks when an error is introduced, so bugs do not linger
+    
+- Literate Programming Cons:
+    - documents with a lot of code are hard to read
+    - processing of documents can be very slow
+
+**B. How Can a Project be Made Reproducible?**
+
+- Commit to do it from the start
+- Use version control (Git)
+- Use software that can be coded
+- Don't save the output, save the raw data and the programs that convert those files to output
+
+**C. What is Knitr?**
+
+- Knitr is a CRAN stored R package
+- Knitr supports RMarkdown, LaTex, and HTML as documentation languages and can export them to PDF or HTML
+- Knitr is built into RStudio
+- Using knitr requires knowledge of either RMarkdown, LaTex, or HTML (JHU uses RMarkdown)
+
+- Pros of knitr:
+    - Knitr is good for manuals (how to use a piece of software)
+    - Short to medium length technical documents
+    - Tutorials
+    - Reports
+    - Data preprocessing documents/summaries
+    
+- Cons of knitr:
+    - Bad for very long research articles and time consuming computations (slow computation       time)
+    - Documents requiring precise formatting (aesthetics limited to what RMarkdown can do)
+    
+**D. The Mechanics of Knitr**
+
+- Code chunks begin with "'''{r}" and end with "'''"
+- Code chunks can have names, just passing them after the "r" declaration at start
+
+```{r CODECHUNK1}
+# this R code block is called "CODECHUNK1"
+print("CODECHUNK1 Executes")
+```
+   
+- Setting "results=asis" prints the output verbatim instead of rendering it into HTML 
+- Setting "echo=FALSE" after R declaration indicates that the code will not be printed out
+- Setting "eval=FALSE" prints out the code but does not print the output
+
+```{r, echo=FALSE}
+# this R code block is called "CODECHUNK1"
+print("This will not be printed")
+```
+
+- opts_chunks$set is a function that can set global arguments for the chunks of code in an RMarkdown file (must be defined in the initial code chunk)
+- fig.height and fig.width accept numerical values to communicate the size of outputted figures
+- Caching can occur on a chunk-by-chunk basis by declaring "chunk=TRUE" which evaluates the code the first time, but will load the code off of disk if it is run again and that chunk is unaltered
+- Note that a code chunk may not be cachable if it is directly related to other code in uncachable ways
+    

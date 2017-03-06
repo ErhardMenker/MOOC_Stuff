@@ -1,0 +1,130 @@
+Statistical Inference - Week 4
+=============================================================
+
+####*Video 11.1 - 11.4 Power*
+
+**A. Power Introduction**
+
+- Power is the probability of rejecting the null hypothesis when it is false
+- Higher power means a statistical test is better, all else the same
+- Type II error is the failing to reject a false null hypothesis, which occurs with probability Beta
+- Power = 1 - Beta
+- Power is a function that depends on the mean of the null hypothesis
+
+**B. Calculating Power**
+
+- As always, reject the null hypothesis if the test statistic falls into the rejection region
+- For a one-tail t-test, the null hypothesis is true with the probability that the true population mean equals the null hypothesis value given the distributional assumptions
+- In R, the power is: pnorm(mu0 + qnorm(1 - alpha) * sigma / sqrt(n), mean=mua, sd=sigma / sqrt(n), lower.tail=FALSE)
+
+```{r}
+### One-Tailed Hypothesis test with:
+mu0 = 30
+mua = 32 # (right side test)
+sigma = 4
+n = 16
+
+# calculate the alpha given an alpha of 0.05 (obviously this is a given, just for completeness)
+pnorm(mu0 + qnorm(1 - 0.05), mean=mu0, sd=4/sqrt(16), lower.tail=FALSE)
+
+# calculate the power given an alpha of 0.05
+pnorm(mu0 + qnorm(1 - 0.05), mean=mua, sd=4/sqrt(16), lower.tail=FALSE)
+```
+
+**C. Plotting the Power Curve**
+
+- The power curve shows how a hypothesis test's power (y) increases as the alternative hypothesis' value increases (x), all else the same
+- The slope of the power curve is positive because you're more likely to reject the null in favor of the alternative hypothesis, or detect a difference, when the difference between the hypotheses is larger
+- All else the same, a hypothesis test with a larger sample size will have a steeper power curve because the conclusion of a population mean at least as great as the alternative hypothesis is stronger when there are more observations backing up this conclusion
+- An increase in sigma decreases power because measurements are noisier; it's going to be easier to attribute a sample mean that is at least as large as the alternative hypothesis to sampling randomness
+- An increase in the significance level, or alpha, increases power because it makes it easier to reject the null hypothesis which decreases type II error probability (Beta) which increases power
+- The power of a one sided test is greater than the power of the associated two sided test, because alpha is decreased (divided by 2), which makes it harder to reject the null when it should be rejected
+
+**D. T-Test Power**
+
+- For smaller sample sizes, the assumption of normality does not hold so it is assumed that the population distribution can be modelled only by a t-distribution
+- For a one sample t-test, if the data actually follows the alternative hypothesis distribution, it does not follow a classic t-distribution but rather follows the non-central t-distribution
+- In R, this problem can be calculated with the power.t.test() function which solves for the parameter argument not given
+
+```{r}
+# test the null of mu0 = 30 vs the alternative of mu > 32 with n = 16 & sigma = 4 with 0.05 sig
+power.t.test(n=16, delta=2, sd=4, sig.level=0.05, type="one.sample", alt="one.sided")$power
+# note that delta is the difference in true means (how much the alternative hypothesized value exceeds the null)
+
+# for the same information but an unknown n, what n is required to give a power of 0.8?
+power.t.test(power=0.8, delta=2, sd=4, type="one.sample", alt="one.sided")$n
+```
+
+####*Video 12.1 Multiple Comparison*
+
+**A. Multiple Comparison Motivation**
+
+- Doing more than one hypothesis test requires corrections based on violated assumptions
+- Significance analysis is commonly overused and in improper ways
+- Correcting for multiple testing helps to avoid false positives/discoveries
+- The need for multiple testing has increased as we have gone from asking simple descriptive statistics questions from data to wringing out every last possible inference, especially has data availability has increased dramatically
+- Example: if you do 20 non-sensical hypothesis tests, it is very likely that one of them will have significance at the 5% level using p-values
+
+**B. Types of Error Rates**
+
+- False positive rate: the rate at which the false results are called significant
+- Family wise error rate: the probability of at least one false positive
+- False Discovery Rate: the rate at which claims of significance are false
+- Example: if you are conducting 10,000 hypothesis tests with an alpha of 0.05, then the expected number of false positives is 0.0 * 10000 = 500
+
+**C. The Bonferroni Correction**
+
+- How can a large amount of false positives be avoided?
+- The Bonferroni Correction divides the original alpha by the number of hypothesis tests and compares the p-value against this divisor value
+- This test is easy to calculate but very conservative (the probability of type I error in the whole group of tests is this newly reduced significance level)
+
+**D. Controlling False Discovery Rate (FDR)**
+
+- Popular in signal processing hypothesis testing when many different hypothesis tests occur
+- The goal is to avoid declaring significance where there is in fact no significance
+- Calculate all of the p-values and order them; any p-value that is less than the original significance level multiplied by the index of the p-value divided by the amount of tests significant
+- Therefore, this hypothesis test will reject and fail to reject a pre-determined amount of individual hypothesis tests so it "grades on a curve"
+- Pros: easy to calculate, much less conservative than Bonferroni Correction
+- Allows for more false positives than Bonferroni and may act strangely on inter-dependent hypothesis tests
+
+####*Video 13.1-13.4 The Bootstrap*
+
+- The bootstrap is a tremendously useful tool for constructing confidence intervals and calculating standard errors for difficult statistics by replacing complicated mathematical derivations with computer simulation
+- Example: how can you derive a median confidence interval?
+- The term refers to "pulling yourself up by the bootstraps," or using the information you can use to make a difficult problem easier
+- Instead of making derivations from the theoretical population distribution, the bootstrap samples with replacement from the empirical observations in sample
+- Example: To find the distribution of averages over 50 die rolls, roll a dice many times, and then continuously sample (with replacement) 50 die from this empirical grouping and calculate the distribution of averages from there
+
+```{r}
+require(UsingR)
+data(father.son)
+x <- father.son$sheight
+n <- length(x)
+B <- 10000
+resamples <- matrix(sample(x, n * B, replace=TRUE), B, n) # 10000 times, sample (with replacement) as many observations as there are in the empirical distribution and place in matrix
+resampledMedians <- apply(resamples, 1, median) # calculate the median for each row, or full sample of the amount of observations as there are in the bootstrapped sample
+
+# NOTE: any statistic taken on the resampledMedians vector is the statistic of that median (e.g. taking standard deviation on it gives the "standard error of the median")
+
+# show the distribution of the sampled medians
+require(ggplot2)
+g <- ggplot(data.frame(medians=resampledMedians), aes(x=medians))
+g <- g + geom_histogram(color="black", fill="lightblue", binwidth=0.05)
+g
+
+sd(resampledMedians) # standard error of the median
+quantile(resampledMedians, c(0.025, 0.975)) # 95% CI of the sampling distribution
+```
+
+- The bootstrap principle suggests that using the distribution defined by the data can approximate the true underlying sampling distribution
+- In principle, the bootstrap principle requires no simulation but always does in practice
+- Bootstrapping is a rich subject that has many applications in understanding a sampling distribution
+- Bootstrapping is non-parametric (it is all based on the empirical distribution, there is no assumption that the sampling distribution follows a theoretical distribution)
+- Better percentile bootstrap confidence intervals correct for bias
+
+- Bootstrap Algorithm:
+1) Sample n observations with replacement from the observed data to get one complete data set
+2) Take the desired statistic on the data set
+3) Repeat this process B times (make B large to reduce Monte Carlo sampling error)
+4) Plot a histogram to see the distribution of the statistic; calculate the standard deviation to get the standard error of the statistic, calculate quantiles of the statistic, etc
+

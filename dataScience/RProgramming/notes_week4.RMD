@@ -1,0 +1,130 @@
+<center> <h2>R Programming - Week 3</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 The str Function*
+
+- The str function is the most important function in all of R.
+- The str function compactly displays the summary of R objects.
+- str provides roughly one lines of output per basic object.
+
+```{r echo=TRUE, eval=TRUE}
+str(str) # shows that the input to the str function is an object
+
+str(lm) # shows the arguments to the lm function
+
+x <- rnorm(100, 2, 4)
+summary(x) # shows the minima and maxima and other summary statistics
+str(x) # shows the range of the command in generating x, as well as the first batch of random variates
+
+f <- gl(40, 10) # generate 40 levels 10 times each
+str(f) # says this is a factor object, how many loevels, and how many times each is repeated
+
+library(datasets)
+str(airquality) # says that this object is a data frame, how many observations/characteristics, and some of the first observations
+
+m <- matrix(rnorm(100), 10, 10)
+str(m) # shows the dimensions of m, the class of m, and the first part of the first column of m
+```
+
+####*Video 1.2 - 1.4 Simulation
+
+**A. Generating Random Numbers**
+
+- Functions for probability distributions in R:
+    - rnorm: generate random Normal variates with a given mean and sd
+    - dnorm: evaluate the Normal probability density at a (vector of) points
+    - pnorm: evaluate the cumulative distribution function for a normal distribution
+    
+- Probability distribution functions typically have four functions associated with them:
+    - d for density
+    - r for random number generation
+    - p for cumulative distribution
+    - q for quantile function
+
+```{r echo=TRUE, eval=TRUE}
+dnorm(x, mean = 0, sd = 1, log = FALSE)
+pnorm(q = 0.5, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+qnorm(p = 0, mean = 0, sd = 1, lower.tail = TRUE, log.p = FALSE)
+rnorm(n = 50, mean = 0, sd = 1)
+
+# standard random normal examples
+dnorm(x = 0) # the height of the standard normal at x = 0 is 0.3989
+qnorm(p = 0.5) # the location of x where half of the density to the left is 0
+pnorm(q = 0) # when x is equal to zero, half of the density is to the left
+
+x <- rnorm(10) # generate 10 standard normals randomly
+x <- rnorm(10, 20, 2) # generate 10 random normals with mean 20 and sd of 2
+summary(x)
+```
+
+- Setting the random number seed with set.seed ensure reproducibility by generating the same random normals at each run.
+- set.seed(int) sets a seed identified by the integer passed in (arbitrarily chosen).
+
+```{r echo=TRUE, eval=TRUE}
+set.seed(1)
+rnorm(5)
+rnorm(5) # generates a different batch, you didn't call set.seed() again
+set.seed(1)
+rnorm(5) # same randoms generate as initial when the seed was set
+
+rpois(10, 1) # 10 Poissons with a mean of 1
+rpois(20, 30) # 20 Poissons with a mean of 30
+ppois(2, 2) # probability a Poisson with mean of 2 is less than or equal to 2
+ppois(4, 2) # probability a Poisson with mean of 2 is less than or equal to 4
+ppois(6, 2) # probabilit a Poisson with mean of 2 is less than or equal to 6
+ ```
+
+**B. Simulating a Linear Model**
+
+```{r echo=TRUE, eval=TRUE}
+# simulate y as a function of x where a y-intercept of .5 and a slope of 2 are assumed
+set.seed(20)
+x <- rnorm(200) # generate 200 standard random normals
+e <- rnorm(100, 0, 2) # generate 100 random normals with mean 0 and sd of 2 (noise)
+y <- 0.5 + 2 * x + e # y is a function of 2 times x, plus 0.5, plus white noise
+plot(x, y) 
+```
+
+**C. Random Sampling**
+
+- The sample function allows random sampling of elements in an inputted vector.
+- If the number of trials is left blank, a permutation is given.
+- Unless overwritten, the default is to sample without replacement.
+
+```{r echo=TRUE, eval=TRUE}
+sample(1:10, 4) # sample 4 elements from 1 through 10 without replacement
+sample(letters, 5) # sample 5 letters without replacement
+sample(1:10) # sample every number 1 through 10 in random order (permutation)
+sample(1:10, replace = T)  # sample 10 elements but with replacement (repeats possible)
+```
+
+####*Video 1.5 The R Profiler#
+
+**A. Profiling Overview**
+
+- The R Profiler is a tool to assess programs that are taking a long time.
+- Profiling systematically examines how much time is spent running a program.
+- In order to speed up code, you need to know where time is being spent.
+- Profiling is useful for testing code that runs 1000s of times in loop: can it be made more efficient???
+- Design first, then optimize.
+
+**B. system.time()**
+
+- system.time() takes an arbitrary R expression as input and returns evaluation time.
+- Returns an object of class proc_time
+- Time of execution can be divided into two parts:
+    - User time (time charged to the CPU)
+    - Elapsed time (time spent waiting around before CPU execution)
+- Elapsed time is greater than user time if CPU is just waiting around.
+- User time is greater than elapsed time if machine has multiple cores.
+- R defaults to using 1 core, but can be overwritten using parallel computing packages.
+- system.time() is only useful if you know where the problem is.
+
+**C. The R Profiler**
+
+- The Rprof() starts the profiler in R.
+- The summaryRprof() summarizes the results of Rprof().
+- Rprof() keeps track of the function call stack and says how long different function executions take.
+- Subtracting lower level function run time from upper level, in nested functions, is necessary to tell where real time's spent(time can be spent in multiple functions at once).
+- If R code calls C/Fortran, this code is not profiled.
+

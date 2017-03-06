@@ -1,0 +1,140 @@
+Practical Machine Learning - Week 1
+===============================================================
+
+####*Video 1.1-1.3 Prediction*
+
+**A. Prediction Motivation**
+
+- Who predicts?
+    - Google predicts whether you will click on an ad
+    - Netflix predicts which movie you will watch
+    - Insurance companies predict losses that their policy holders will face
+- Netflix rewarded a team a million dollars for creating the best algorithm to predict what shows people would watch next
+- Sites like Kaggle host competitions for predictive modelling
+- This course focuses on the practical implementation of machine learning as written into the Caret package; Andrew Ng's Stanford machine learning class covers more of the theory behind it
+
+**B. Prediction Oveview & Methodology**
+
+- The central dogma of prediction: take a well defined sample, subset out data to train a model, and then apply a prediction function on the test data to predict what the output value of that input is
+- What can go wrong: Google created an algorithm to predict where flus would occur based on search terms, but they did not plan for the fact that search terms would change so their model became anachronistic
+- Components of a Predictor (Abstract)
+    1) Question: What am I trying to predict and what should I use for this?
+    2) Input Data: Select data narrowly tailored to answer the prediction question
+    3) Features: Transform the raw data into features that can be used for prediction
+    4) Algorithm: Use the algorithm (e.g. random forest) that best answers the question at hand
+    5) Parameters: Raw results that appear when the algorithm is exacted on the data
+    6) Evaluation: Apply the parameters to answer the question based on the test data
+- Components of a Predictor (SPAM Example)
+    1) Question: Can I use quantitative predictors of a variable to classify it as SPAM/HAM?
+    2) Input Data: R has a spam dataset that can be loaded directly into R from kernlab package
+    3) Features: Calculate as an observation the fraction of words that are "your" or "money"
+    4) Algorithm: If "your" is more than a percentage C of the words, classify as SPAM
+    5) Parameters: Evaluate the fraction of "your" for each email
+    6) Evaluation: Classify as SPAM or HAM based on how the percentage of "your" compares to the threshold
+- Each component/step of predictive modelling is less important than the last; if a question is not well formed than the data that are received will fail to address the question and the best algorithm will fail if it uses improper data
+- The importance of the sequences of steps relates to the garbage in -> garbage out principle
+- Know when to give up in predictive modelling when the situation calls for it ("The combination of some data and an aching desire for an answer does not ensure that a reasonable answer can be extracted from a given body of data." - John Tukey)
+- Often times, getting more quality data can beat out a more sophisticated model/algorithm
+- The most common mistake in machine learning is using unrelatd data which really just shares spurious noise in common with the training set but not the general population
+
+**C. The Importance of Features**
+
+- Features are a way of compressing raw data into variables that compare to the dependent variable in question in an ordinal way
+- Properties of good features:
+    - Lead to data compression
+    - Retain relevant information
+    - Created based on expert knowledge
+- Common features pitfalls:
+    - Trying to automate feature selection (this can be done in some situations with semi-supervised/deep learning)
+    - Not paying attention to data specific quirks
+    
+**D. Machine Learning Virtues**
+
+- The "best" machine learning algorithm is:
+    - Interpretable: the audience needs to be able to understand the practical ramifications of the results
+    - Simple: be able to understand the intuition behind the algorithm
+    - Accurate: Promote interpretability and simplicity until the model that is generated becomes inaccurate
+    - Fast: The model can be trained and tested on small samples
+    - Scalable: It can be run across many more samples because the code is written well and parallelizable
+- Interpretability & simplicity are often tradeoffs of accuracy and scalability (Netflix never implemented the million dollar winning algorithm because it wasn't scalable to the massive datasets that Netflix used)
+    - Throwing away information unnecessarily
+    
+**E. Prediction Errors**
+
+- In Sample Error: The error rate you get when predicting outcomes with data used to create the predictor's parameters (resubstitution error)
+- Out of Sample Error: The error rate estimated on data that were not used in generating the predictor's parameters (generalization error)
+- Out of sample error is more important and larger than in sample error because the model that is trained will capture the noise for the given sample; this noise will only reflect in the errors when other data not used to generate the parameters is tested with the model
+
+```{r}
+### Example: Use the spam dataset and a capital letter rule to predict SPAM vs HAM
+require(kernlab); data(spam); set.seed(333)
+# extract a sample of 10 observations from the spam dataset
+smallSpam <- spam[sample(dim(spam)[1], size = 10), ]
+# if an email is spam assign the entry as 2, otherwise 1 (used as categorical plotting variable)
+spamLabel <- (smallSpam$type == "spam") * 1 + 1
+# plot the percentage of capital letters and label whether it actually is spam or not (hypothesis: emails with more capital letters tend to be spam)
+plot(smallSpam$capitalAve, col = spamLabel)
+## note that all spam has a higher capital letter percentage than non-spam except for 1 observation; we could make a piecewise rule that will account for this in our decision rule to suppress in sample error and essentially look at the email on a piece-by-piece basis, but out of sample error will suffer because this rule is non-sensical for generalizable data 
+```
+
+- What's going on in the above example? Every dataset has signal and noise; if you try to tailor your decision rule too accomodate the noise (the nonsystematic nuances of that dataset), then the decision rule/algorithm will make poor predictions when used on out of sample datasets that likely will not match that dataset. Falling for this trap is known as "overfitting"
+
+**F. Prediction Study Design**
+
+- How can an experiment be optimized so that as much signal and as little noise is captured as realistically possible?
+- Prediction Study Design Methodology
+    1) Define what the error rate is
+    2) Split data into a training and test set (and an optional validation set)
+    3) Pick the best features using estimation (e.g. cross validation)
+    4) Pick a prediction function using the training set
+    5) If no validation set apply model 1 time to test set, otherwise tune to the test set and apply once to the validation set
+- Make sure to know what benchmarks can be estimated on an algorithm to give a good assessment of a predictor's accuracy
+- Always leave one dataset that never has an impact on the parameters when testing a machine learning algorithm; teams lost the Netflix prize because they overfitted their model based on the noise of the validation test set (this was the last dataset for them that could impact their models)
+- Kaggle withholds a dataset in their competitions that only they know with which the competitors' algorithms will be tested once
+- How to partition the dataset between testing and training by sample size:
+    - Large datasets should have 60% training, 20% test, and 20% validation
+    - Medium datasets should have 60% training and 40% test
+    - Small datasets should use cross validation and report the small sample caveat (no out of sample)
+- Core principles of prediction study design
+    - There should always be one dataset that is never looked at (the final test set)
+    - Try to sample randomly so the training set will reflect out of sample data
+    - If predictions vary with time then split data based on time (backtesting in finance)
+
+**G. Types of Errors**
+
+- Positive and negative are defined by how the algorithm coins them (e.g. success can be if a person fails a test)
+- "True positive" means correctly identified (e.g. a sick person is diagnosed sick)
+- "False positive" means incorrectly identified (e.g. an unsick person is diagnosed sick)
+- "True negative" means correctly rejected (e.g. an unsick person is diagnosed unsick)
+- "False negative" means incorrectly rejected (e.g. a sick person is diagnosed unsick)
+- "Sensitivity" is the probability of a true positive
+- "Specificity" is the probability of a true negative
+- "Positive predicted value" is the probability that a person has a disease if they tested positive
+- "Negative predicted value" is the probability that someone without a diseases tests negative
+- "Accuracy" is the probability that the correct outcome is predicted (sensitivity plus specificity)
+- For continuous data (e.g. time series), a measure like mean squared error must be used
+
+**H. Receiver Operating Characteristic (ROC) Curve**
+
+- Different cutoffs for prediction rules will impact different quantifiable error rates
+- ROCs plot a the true positive rate as a function of the false positive rate
+- If the area under an ROC is 1 it is a perfect classifier, a 0.5 value corresponds to a random guess, and less than 0.5 is worse than random guessing
+- We want the line to be as high up as possible for a given value of a false positive rate
+
+**I. Cross Validation**
+
+- Recall that the estimated accuracy of the training set is greater than the test set (in sample errors are less than out of sample errors)
+- Cross validation (CV) Methodology:
+    1) Use the training set
+    2) Split into a training and test set
+    3) Build a model on the training set
+    4) Evaluate on the test set
+    5) Repeat this process a set amount of times and average the errors
+- CV uses include picking variables for the model, picking the type of prediction function to use, and estimating the parameters on the variables in the model
+- The partitioning of the dataset into training and test can be done either randomly without replacement, using k-folds (divide the training set into k pieces and iteratively hold out each piece as the test set), or leave-one-out cross validation (the same as k-folds when k is equal to n where n is the amount of observations in the data)
+- In random test set cross validation the sampling must be done without replacement so that the same values aren't tested multiple times (sampling with replacement is the bootstrap which is not appropriate here without correction)
+- In k-folds cross validation, larger values of k correspond to lower bias (because there are more estimates in the training set so accuracy is enhanced) but higher variance (the accuracy becomes highly contingent on the nature of the observation that has been left out, and this is highly variable when this sample is smaller)
+- Even when using cross validation you should try to select the predictor using a test set where that data have not been used in the CV estimation
+
+
+

@@ -1,0 +1,190 @@
+<center> <h2>R Programming - Week 3</h2> </center>
+<center> <h3>---------------------------------------</h3> </center>
+
+####*Video 1.1 lapply and sapply*
+
+**A. lapply**
+
+- lapply executes a function on each element of a list and returns each element into a list.
+- lapply takes three arguments:
+    - A list x
+    - A function identified as FUN
+    - Other arguments via the ... argument (must be named, not positional, arguments)
+- If input x is not a list, it will be coerced under-the-hood by as.list().
+- lapply always returns a list, regardless of the input class. The list returned will be of the length   of the inputted list argument.
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(a = 1:5, b = rnorm(10)) # create a two element list where each element has multiple numerics
+lapply(x, mean) # calculate the mean of each element in list x (a and b)
+
+x <- list(a = 1:4, b = rnorm(10), c = rnorm(20, 1), d = rnorm(100, 5))
+lapply(x, FUN = mean) # return a 4 element list with the mean of a, b, c, and d, respectively.
+
+x <- 1:4
+lapply(x, runif) # 4 element vector x coerced to list upon lapply execution, will create as many                         random uniforms as the integer is (1st element 1 creates 1 uniform,...,4th element                    creates 4 uniforms).
+
+# same as above, but overwrite default of 0 and 1 uniform range by making use of ... arguments which are fed to the function
+x <- 1:4
+lapply(x, runif, min = 0, max = 10)
+```
+
+- Apply statements make heavy use of anonymous functions. These kinds of functions are not named, but    generated on-the-fly. 
+- Anonymous functions are implemented in apply statements by declaring function(lollipop), and then      doing an operation on lollipop. In this case, lollipop is a placeholder for each element in the       list that will be operated on.
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(a = matrix(1:4, 2, 2), b = matrix(1:6, 3, 2)) # create a list where each elem is a matrix
+lapply(x, function(elem) elem[, 1]) # assign each operand in x the name elem, and extract                                                   the first column of it.
+```
+
+**B. sapply**
+
+- sapply tries to simplify the result of lapply, if possible.
+    - If the result is a list where every element is length 1, a vector is returned.
+    - If the result is a list where every element is a vector of same lenght >1, a matrix is returned.
+    - If sapply can't figure things out, a list is returned (simply what lapply would do).
+
+```{r echo=TRUE, eval=TRUE}
+x <- list(a = 1:4, b = rnorm(10), c = rnorm(20, 1), d = rnorm(100, 5))
+lapply(x, mean) # returns a 4 element list, each with one entry
+sapply(x, mean) # collapses the list produced from an equivalent lapply into a 4 element vector. Each                    element in the vector is titled by the name assigned in the list creation.
+```
+
+####*Video 1.2 apply*
+
+- apply is used to evaluate a function over the margins of an array instead of element by element.
+    - apply most often applies a function to the rows or columns of a matrix.
+    - apply can be used with general arrays (more than 2 dimensional), such as taking the average of        an array of matrices.
+    - apply is not usually faster than a loop, but does work in one line so code is condensed!
+- syntax: apply(x, MARGIN, FUN, ...) where:
+    - x is an array.
+    - MARGIN is an integer vector indicating which margins should be "retained" (1 for rows, 2 for           columns).
+    - FUN is the function to be applied.
+    - ... is other arguments to be passed to FUN.
+    
+```{r echo=TRUE, eval=TRUE}
+x <- matrix(rnorm(200), 20, 10) # create a 20 by 10 matrix filled with 200 random standard normals 
+apply(x, 2, mean) # over every column (2), calculate the mean (returns 10 element numeric vector)
+apply(x, 1, sum) # over every row (1), calculate the sum (returns 20 element numeric vector)
+apply(x, 1, quantile, probs = c(0.25, 0.75)) # over every row, execute the quantile function with                                                     function argument probs
+```
+
+- Note that there have been many built in functions to speed up apply type functions. For instance...
+    - rowMeans(x) = apply(x, 1, mean)
+    - colSums(x) = apply(x, 2, sum)
+    
+```{r echo=TRUE, eval=TRUE}
+a <- array(rnorm(2 * 2 * 10), c(2, 2, 10)) # create a 2 by 2 by 10 array of random normal variables
+apply(a, c(1,2), mean) # collapse the third dimension by taking the mean of the height variable at a                            given row and column, returns 2 by 2 matrix
+```
+
+####*Video 1.3 mapply*
+
+- mapply is a multivariate apply which applies a function in parallel over a set of arguments. 
+- While previous apply statements only work on one input data structure, mapply takes multiple data      structures as arguments.
+- syntax: mapply(FUN, ..., More_args = NULL, SIMPLIFY = TRUE) where...
+    - FUN is the function to apply
+    - ... contains arguments to apply over
+    - MoreArgs is a list of other argument to FUN
+    - SIMPLIFY indicates whether the results should be simplified
+- Therefore, mapply takes a function name as the first argument. Each successive non-optional argument   is an argument of that function that is inputted and evaluated in the function iteratively. 
+
+```{r echo=TRUE, eval=TRUE}
+# repeat integer one four times,...,integer 4 one time.
+list(rep(1, 4), rep(2, 3), rep(3, 2), rep(4, 1)) # tedious way to type
+mapply(rep, 1:4, 4:1) # execute the repeat function by pairing 1 as the first argument of rep and 4 as                         the second arg of the first execution, and so on...
+```
+
+####*Video 1.4 tapply*
+
+- tapply is used to apply a function over subsets of a vector. 
+- syntax: tapply(X, INDEX, FUN = NULL, ..., simplify = TRUE) where:
+    - x is a vector
+    - INDEX is a factor or a list of factors that uniquely maps each subset of the vector by ordered        pairs
+    - FUN is a function to be applied
+    - ... contains other arguments to be passed to FUN
+    - SIMPLIFY indicates whether the result should be simplified (not simplifying gives a list)
+    
+```{r echo=TRUE, eval=TRUE}
+x <- c(rnorm(10), runif(10), rnorm(10, 1)) # create a 3 element vector, each element containing rands
+f <- gl(3, 10) # create a factor variable that repeats integer 1 through 3 ten times each
+f
+tapply(x, f, mean) # take vector x, group the first 10 elements,...,the last 10 elements (communicated                      by the factor argument) and calculate the mean statistic for each grouping     
+tapply(x, f, range) # calculate the range for each grouping of 10 numbers as ordered by f
+```
+
+####*Video 1.5 split*
+
+- split takes a vector or other objects and splits it into groups determined by (a list of) factors.
+- split always returns a list.
+- syntax: split(x, f, drop = FALSE, ...)
+    - x is a vector, list, or data frame
+    - f is a factor (or coerced to one) or a list of factors
+    - drop indicates whether empty factors levels should be dropped
+    
+    
+```{r echo=TRUE, eval=TRUE}
+x <- c(rnorm(10), runif(10), rnorm(10, 1)) # create a 3 element vector, each element containing rands
+f <- gl(3, 10)
+split(x, f) # returns a 3 element list, each list containing the 10 random normals mapped to its                    factor
+```
+
+- split is commonly followed by an lapply (same as just doing tapply, but less condensed).
+
+```{r echo=TRUE, eval=TRUE}
+x <- c(rnorm(10), runif(10), rnorm(10, 1)) # create a 3 element vector, each element containing rands
+f <- gl(3, 10)
+lapply(split(x, f), mean) # split x by the different factor and then execute the mean operation over                              each list element (each element containing 10 random variables)
+```
+
+- Splitting a data frame can be done (example: splitting a data frame by monthly pieces).
+
+```{r echo=TRUE, eval=TRUE}
+library(datasets)
+head(airquality) # extract the airquality data frame housed in the library datasets
+# goal: take the mean of the other variables in the data frame based on the month:
+s <- split(airquality, airquality$Month) # returns a list of data frames by month
+sapply(s, function(elem) colMeans(elem[, c("Ozone", "Solar.R", "Wind")])) # take column mean of elmnts
+```
+
+- Splitting on more than one level is possible.
+
+```{r echo=TRUE, eval=TRUE}
+x <- rnorm(10)
+f1 <- gl(2, 5) # factor with 2 levels of 5 elements (1 1 1 1 1 2 2 2 2 2)
+f2 <- gl(5, 2) # factor with 5 levels of 2 elements (1 1 2 2 3 3 4 4 5 5)
+interaction(f1, f2) # creates as many unique factors that can exist between f1 and f2
+split(x, list(f1, f2), drop = F) # maps first elem of x to 1.1, second to 1.1, third to 1.2,...
+```
+
+####*Video 1.6 - 1.8 Debugging*
+
+**A. Diagnosing the Problem**
+
+- Indications that something is wrong:
+    - message: A generic notification produced by the message function; execution of function               continues
+    - warning: An indication something is wrong but not necessarily fatal; execution of function            continues
+    - error: An indication that a fatal problem has occurred, execution stops
+    - condition: programmer generated message that something unexpected occurred (semantic errors)
+    
+- How do you know something is wrong with a function?
+    - What was the input? How was the function called?
+    - What were you expecting vs what was actually received?
+    - How exactly do expectations vs results differ?
+    - Were the expectations correct?
+    - Can the results be reproduced (example: set a seed for random number generation)?
+    
+**B. Debugging Tools**
+
+- Primary R tools for debugging:
+    - traceback: prints out the function call stack after an error occurs (nested functions are             printed out by name). This means the last function printed out is where the error occurred.
+    - debug: flags a function for "debug" mode which allows you to step through execution of a              function one line at a time
+    - browser: suspends the execution of a function wherever it is called and puts the function in          debug mode
+    - trace: allows you to insert debugging code into a function at specific places
+    - recover: allows you to modify the error behavior in order to browse the function call stack
+- These debugging statements allowed a function to be picked through, print debugging also is usable.
+
+```{r echo=TRUE, eval=TRUE}
+mean(x) # assume x does not exist
+traceback() # this will print out just mean(X), meaning that the error occurred here, not another                   called function
+```
+    

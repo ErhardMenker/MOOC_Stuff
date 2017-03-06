@@ -1,0 +1,201 @@
+Practical Machine Learning - Week2
+=======================================================
+
+####*Video 2.1 Caret Package Introduction*
+
+- The caret package is a central machine learning package in R
+- Caret contains functions that allows the user to...
+    - Clean data
+    - Split data
+    - Training and testing functions
+    - Model comparison (confusionMatrix)
+- Caret predicts with the proper output object without the user having to worry about specifying for a different machine learning algorithm
+
+```{r}
+### SPAM/HAM Example
+require(caret); require(kernlab); data(spam)
+## partition the data into 75% training and 25% test
+inTrain <- caret::createDataPartition(y = spam$type, p = 0.75, list = FALSE)
+# store the training and testing data set in a program variable
+training <- spam[inTrain, ]
+testing <- spam[-inTrain, ]
+dim(training)
+## fit a model
+set.seed(32343)
+# fit a GLM model using caret's learning features
+modelFit <- caret::train(type ~ ., data = training, method = "glm")
+modelFit
+## predict
+predictions <- predict(modelFit, newdata = testing)
+predictions
+## evalute prediction
+caret::confusionMatrix(predictions, testing$type)
+```
+
+####*Video 2.2 Data Slicing*
+
+- The caret package allows data splitting as a built in feature
+- caret::createDataPartition() splits the data set into training and testing sets; key arguments:
+    - y is a character vector storing each observation's outcome variable
+    - p is the percent of the data to put in the training set
+    - list is a Boolean; TRUE returns a list, FALSE returns a matrix
+- caret::createFolds() splits the data set into different folds; key arguments:
+    - y is a character vector storing each observation's outcome variable
+    - k is the number of folds to produce
+    - returnTrain is a Boolean corresponding to whether the training or test set should be returned
+- caret::createResample() resamples the test/training set randomly an inputted amount of times; key arguments:
+    - y is a character vector storing each observation's outcome variable
+    - times is the amount of resamplings to occur
+- caret::createTimeSlices() breaks the data set into different time periods (important for backtesting); key arguments:
+    - y is a character vector storing each observation's outcome variable
+    - initialWindow is the amount of samples in the training set in each window
+    - horizon is the number of subsequent samples to take beyond the training set to put in the test set
+
+```{r}
+### SPAM/HAM Example
+# 1) createFolds() (k-folds)
+require(caret); require(kernlab); data(spam)
+# execute k-folds partitioning
+set.seed(32323)
+folds <- caret::createFolds(y = spam$type, k = 10, list = TRUE, returnTrain = TRUE)
+sapply(folds, length) # output the size of each fold's training  sample (roughly equivalent)
+
+# 2) createResample() (resampling)
+set.seed(32323)
+folds <- caret::createResample(y = spam$type, times = 10, list = TRUE)
+sapply(folds, length) # these are equal because we are dictating this with the times parameter
+folds[[1]][1:10] # varies because sampling is done with replacement
+
+# 3) createTimeSlices() (create time slices)
+set.seed(32323)
+tme <- 1:1000
+folds <- caret::createTimeSlices(y = tme, initialWindow = 20, horizon = 10)
+names(folds) # broken into training and test
+folds$train[[1]] # shows that for the first window, first 20 observations are sampled
+folds$test[[1]] # shows that the first 10 observations beyond the first 20 in the training set are used as the first test set
+# after each subsequent estimation, the sample is moved over to the right by one
+```
+
+####*Video 2.3 Caret Training Options*
+
+- args(train.default) shows what the default training options are when you go to train a model via caret
+- Metric options are:
+    - Continuous outcomes: Root mean squared error, R squared
+    - Categorical outcomes: Accuracy (fraction correct)
+- args(trainControl) shows the arguments in trainControl (including the method of sampling, the size of the training set p, etc)
+    - method: boot = bootstrapping, boot632 = bootstrapping with adjustment, cv = cross validation, repeatedcv = repeated cross validation, LOOCV = leave one out cross validation
+    - number: For boot/cross validation, number of samples to take
+    - repeats: number of times to repeate subsampling (if big, slows things down)
+- Make sure to set a random number seed (via set.seed()) so that the experiment will be repeatable even if it is generating pseudorandom numbers
+
+####*Video 2.4 Plotting Predictors*
+
+- Plots illustrate what is going on to the eye amongst variables in the training set
+- Only plot on the training set; making decisions based on the test set plots is analogous to fitting based on the test set
+- Strength of relationships between variables, outliers, skewed variables, etc are things to note from exploratory data analysis
+
+```{r}
+### Wage Data Example
+require(ISLR); require(ggplot2); require(caret)
+data(Wage)
+summary(Wage)
+
+## split the data into a training and test set
+inTrain <- caret::createDataPartition(y = Wage$wage, p = 0.7, list = FALSE)
+training <- Wage[inTrain, ]
+testing <- Wage[-inTrain, ]
+dim(training); dim(testing)
+
+## feature plot (via caret package)
+caret::featurePlot(x = training[ , c("age", "education", "jobclass")], y = training$wage, plot = "pairs")
+qq <- ggplot2::qplot(age, wage, data = training, color = jobclass) # age and wage tend to trend together
+qq + geom_smooth(method = "lm", formula = y ~ x) # fit a linear model for each education level
+
+## convert the continuous wage variable into 3 different classification bin factors (allows boxplot of a variable amongst different categorical values)
+cutWage <- Hmisc::cut2(training$wage, g = 3)
+table(cutWage, training$jobclass)
+
+## density plots of wage by education
+ggplot2::qplot(wage, colour = education, data = training, geom = "density")
+```
+
+####*Video 2.5 Preprocessing Data*
+
+**A. Normalizing Variables**
+
+- Variables with high skew and variability can mess up the model's results; consider standardizing the variable (similar to standard normalizing a random variable)
+- To standardize a variable, subtract each observation by its sample mean and divide by the sample standard deviation
+- Standardization can be done via the caret::preProcess() function and setting method equal to c("center", "scale")
+
+**B. Box-Cox Transformation**
+
+- Box-Cox transformations take continuous data and normalize them 
+
+**C. Impute Data**
+
+- If data are missing, many prediction algorithms will automatically fail
+- Imputing data is the process of placing data in observations based on a decision rule usually involving other observations in the data set
+- K-nearest neighbors imputation (caret::preProcess() argument) averages the k nearest values and imputes them at the position for missing data
+
+####*Video 2.6 Covariate Creation*
+
+**A. Covariate Overview**
+
+- Covaraites are the actual features that are used to predict the outcome variable
+- Good covariates compress multiple variables into one and make it a better explanation of the outcome variable in question
+- Features are variables that explain the raw data (raw data -> covariates -> tidy covariates)
+
+**B. Level 1 - Raw Data to Covariates**
+
+- The best covariates depend heavily on application
+- The balancing act is summarization (being able to collapse dimensionality well) vs information loss (losing information unique to each column)
+- Working with people who have a lot of knowledge on this subject improves this performance
+- When in doubt, err on the side of more features
+- This process can be automated but with great caution (easy to model noise as signal)
+
+**C. Level 2 - Covariates to Tidy Covariates**
+
+- More necessary for some methods (regression, SVM) than for others (classification trees)
+- Should be done only on the training set
+- The best approach is through exploratory analysis (plotting/tables) (e.g. how do variables really appear to relate to one another?)
+- Make sure to append these new features to the data frame (not just generated on-the-fly during estimation) so they can be referenced later
+- One feature of a desirable covariate is that it has variability (obviously), using the nearZeroVar() function tests for this on each variable included in the data frame
+
+```{r}
+require(ISLR); require(caret); data(wage)
+# build the training set via caret
+inTrain <- caret::createDataPartition(y = Wage$wage, p = 0.7, list = FALSE)
+# store the training and test set in program variables
+training <- Wage[inTrain, ]; testing <- Wage[-inTrain, ]
+# analyze how many people are in industry vs information
+table(training$jobclass)
+# let's create a dummy variable based on job type (earlier plot shows it to be important)
+dummies <- dummyVars(wage ~ jobclass, data = training) # creates 2 categorical variables that is 1 if the observation belongs to that jobclass (each column will have 1 observation as 0 and the other as 1)
+head(predict(dummies, newdata = training))
+# test for covariates that do not vary
+nsv <- nearZeroVar(training, saveMetrics = TRUE)
+nsv # shows which variables to not vary in the data (have ~ 0 freqRatio)
+```
+
+####*Video 2.7 Preprocessing Covariates Via Principal Component Analysis (PCA)*
+
+- PCA acknowledges that not every predictor might be needed because variables could be highly correlated with one another
+- Including too many variables that are highly correlated with one another increases noise
+- PCA seeks to explain variation in the dependent variable via breaking down the aggregation of independent variables into principal components
+- PCA executes by finding a set of multivariate variables that are uncorrelated and explain as much variance as possible (statistical)
+- If all variables are put together in one matrix, judge the "best" matrix as the matrix with the fewest ranks that still sufficiently explains the variation behind the dependent variable
+- Principle component analysis can be executed in base R via the prcomp() function
+- prcomp() returns a list; one of the important elements is the rotation entry which lists out each principle components (lists the variables and the corresponding coefficient of the variable in the sum product)
+- PCA can be executed in the caret package via the preProcess() function by setting the "method" argument to "pca" and the "pcaComp" argument to the number of principal components you wish to consider
+- PCA is most useful for linear-type models but can make it hard to interpret predictors
+- Outliers can wreak havoc on PCA so they should be treated with proper transformation like logs and Box Cox
+
+####*Video 2.8 Predicting with Regression*
+
+- The fundamental idea behind regression prediction is to fit a simple linear regression model over the training set and then plug in new covariate values from the test set to fit the equation
+- This is useful when the relationships between data are linear and is simple to interpret/parsimonious
+- The downfall to linear regression is when the relationships between data series are not linear
+- In R, linear models are fit with the glm() function and predictions occur by putting that lm specification as the first argument and a data frame of new independent variable values as the second argument in the predict() function
+- Prediction intervals can be calculated by adding an "interval" argument set to "prediction" in the predict() function
+- In the caret package, this prediction can be done via the train argument which will produce a list with a finalModel attribute (shows the final model being used for prediction)
+
