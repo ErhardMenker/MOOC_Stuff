@@ -1,0 +1,7 @@
+### Supervised Learning
+# Supervised learning algorithms produce output (a regression or classification decision rule) that can be compared against an actual well defined outcome.
+# ML regression algorithms have as output the potential to have an infinite/continuous amount of outcomes 
+# Example: fitting a linear regression curve followed by a quadratic is "supervised" because fitted prices can be compared against observed prices.
+# ML classification algorithms assign each input to a discrete amount of potential outputs.
+# Example: fit divider line(s) based on a system of predictor variables that determines whether a person with specific predictor values has a disease... 
+# ...("supervised" because this divider line can be tested for accuracy based on historical observations).

@@ -1,0 +1,17 @@
+### Parameter Learning
+# Gradient descent is an algorithm used to minimize cost functions in machine learning (not just linear regression)
+# Linear regression gradient descent algorithm
+    # 1) Initialize the y-intercept (beta1) and slope (beta0) parameters to arbitrary values
+    # 2) Keep changing beta0 & beta1 and to reduce the cost function until we reach a (possibly local) minimum
+# Gradient descent keeps moving to new values of the parameters that lower the cost function by the most
+# When the cost function cannot be lowered anymore, this must mean that a local minima was achieved and the algorithm stops
+# Gradient descent algorithms have a "learning rate" alpha which refers to how much beta0 & beta1 are tweaked before reestimation of the cost function
+# Each parameter changes by the negative of alpha times the slope (the gradient) of the cost function at that point, resulting in decreasing the value of the cost function at the new point (for sufficiently small alpha)
+    # If alpha is too small, gradient descent is prohibitively slow
+    # If alpha is too large, gradient descent can either overshoot the minimum, fail to converge, or even diverge
+    # There is no need to decrease alpha as a minimum is converged upon because as the minimum is converged upon, the slope converges to 0 so changes in the parameters become smaller
+# Gradient descent parameters must be updated simultaneously because the cost function is a function of both parameters 
+# Linear regression can be solved via gradient descent
+    # The cost function is the sum of squared errors for the training data
+    # The cost function is convex (bowl shaped), meaning there is no possibiity that it will converge to a local/non-global solution
+    # To see the slope calculation (requires multivariate calculus) in least squares gradient descent, refer to the homework in week2 in the gradientDescent.m Octave script to see the gradient descent implementation for least squares

@@ -1,0 +1,14 @@
+### Model Representation
+# Imagine you wanted a model that predicts housing price based on the house's size
+    # This is a "supervised learning" algorithm because the prediction can be compared to an actual answer (sizes map to prices) to judge correctness
+    # This is a "regression" algorithm because the prediction is continuous (any price can be calculated)  
+# Univariate linear regression models the predictor variable as a linear function of one input
+    # Notation is needed - m is the number of observations trained in the model, x is the input/predictor variable (house size), y is the output/target variable (price)
+    # A hypothesis maps the predictor's value (house size) systematically to an output variable (house price)
+    # The linear regression will be a line that has a y - intercept, beta0, and a slope, beta1
+    # The goal of the linear regression algorithm is to pick a beta0 & beta1 such that the average of the sum of square errors (an error being how much a fitted value of y (yhat) misses the actual value of y) is minimized
+    # The cost function is a way of referring to a sum of square error measure of which the goal is to minimized
+    # If a model accurately predicts every value of y exactly, then the model's cost function is 0 (the model has no error)
+    # Different chosen slope and y intercept values impact the cost function; choose the combo that minimizes that value
+    # These slope and y values can be plotted on a contour plot that maps to their associated cost function value
+# Parameters in regression do not necessarily need to be linear, and picking different exponent terms can lead to different values of the cost function that needs to be minimized

@@ -1,0 +1,4 @@
+### Unsupervised Learning
+# Unsupervised learning stems from problems where the outcome variable is not well defined (e.g. we just have a large table of unmarked data and need to find an empirical relationship between variables).
+# Example: clustering algorithms are unsupervised because there is no a priori/predefined variable definitions to assume that the clusters must be configured a certain way.
+# Example: market segmentation is unsupervised because we do not know in advance which market segment customers fall in; it is just a label given by the algorithm that does not correspond to a preexisting class/concept.

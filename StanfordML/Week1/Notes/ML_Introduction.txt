@@ -1,0 +1,12 @@
+### What is machine learning?
+# Machine learning is the science of getting computers to learn from experience without explicitly being programmed.
+# Neural networks are an application of this concept because they teach computer processors to mimic how the human brain works.
+# Applications are countless; email companies teach email to realize what is SPAM or not by learning from a user's history.
+
+### Why machine learning?
+# Machine learning grew out of the AI field.
+# Computers could find the shortest path with explicit algorithms, but ML algorithms were needed to give computers true power to act intelligently.
+# As computers become more powerful, they can apply stronger and stronger machine learning algorithms.
+# Machine learning algorithms are useful to allow humans to mine large data sets. 
+# Some applications cannot be explicitly programmed like the autonomous helicopter; it became necessary for the computer to teach itself how to fly.
+# Computers cannot be explicitly programmed if there are a vast amount of possible combinations (e.g. the Netflix recommender system).

@@ -1,0 +1,87 @@
+J =
+
+   Inf
+   Inf
+  -Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+
+J =
+
+   Inf
+   Inf
+  -Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+
+J =
+
+   Inf
+   Inf
+  -Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+
+J =
+
+   Inf
+   Inf
+  -Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+   Inf
+
+== 
+==                                   Part Name |     Score | Feedback
+==                                   --------- |     ----- | --------
+==               Feedforward and Cost Function |   0 /  30 | 
+==                   Regularized Cost Function |   0 /  15 | 
+==                            Sigmoid Gradient |   5 /   5 | Nice work!
+==   Neural Network Gradient (Backpropagation) |   0 /  40 | 
+==                        Regularized Gradient |   0 /  10 | 
+==                                   --------------------------------
+==                                             |   5 / 100 | 
+== 
